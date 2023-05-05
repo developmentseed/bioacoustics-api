@@ -1,0 +1,12 @@
+site_name: bioacustics
+site_description: Google Bioacustics API
+repo_url: https://github.com/developmentseed/bioacustics-api
+site_dir: site
+copyright: Copyright &copy; 2020, <a href="https://github.com/developmentseed">developmentseed</a>.
+dev_addr: 0.0.0.0:8001
+
+nav:
+  - Home: 'index.md'
+  - API:
+    - Authentication: 'api/authentication.md'
+    - Users: 'api/users.md'
