@@ -1,6 +1,6 @@
 from django.db import models
 
-from connection import Collection
+from .connection import Connection
 
 
 class MyModel(models.Model):
@@ -10,7 +10,7 @@ class MyModel(models.Model):
     @staticmethod
     def search(query_vector, top_k=10):
         # Search the Milvus collection for similar vectors
-        collection = Collection.get_collection()
+        collection = Connection.get_collection()
         query_data = [float(x) for x in query_vector.split(',')]
         results = collection.search(query_data, top_k=top_k)
         return [MyModel.objects.get(id=r.id) for r in results]
