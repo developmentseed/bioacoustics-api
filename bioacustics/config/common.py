@@ -20,6 +20,7 @@ class Common(Configuration):
         'rest_framework.authtoken',  # token authentication
         # Your apps
         'bioacustics.users',
+        'bioacustics.milvus',
     )
 
     # https://docs.djangoproject.com/en/2.0/topics/http/middleware/
@@ -54,6 +55,14 @@ class Common(Configuration):
             'PASSWORD': os.getenv('POSTGRES_PASSWORD'),
             'HOST': os.getenv('PGHOST', default='localhost'),
         },
+    }
+
+    MILVUS = {
+        'DB_ALIAS': os.getenv('MILVUS_DB_ALIAS', 'bioacustics'),
+        'DB_HOST': os.getenv('MILVUS_DB_HOST', 'localhost'),
+        'DB_PORT': os.getenv('MILVUS_DB_PORT', 19530),
+        'DB_USER': os.getenv('MILVUS_DB_USER'),
+        'DB_PASSWORD': os.getenv('MILVUS_DB_PASSWORD'),
     }
 
     # General
