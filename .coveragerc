@@ -5,6 +5,6 @@ omit = *migrations*,
        *test*,
        *admin*,
        ./manage.py,
-       ./bioacustics/config/*,
-       ./bioacustics/wsgi.py,
+       ./bioacoustics/config/*,
+       ./bioacoustics/wsgi.py,
        *__init__*
