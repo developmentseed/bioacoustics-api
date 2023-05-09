@@ -5,7 +5,7 @@ import sys
 
 
 def main():
-    os.environ.setdefault("DJANGO_SETTINGS_MODULE", "bioacustics.config")
+    os.environ.setdefault("DJANGO_SETTINGS_MODULE", "bioacoustics.config")
     os.environ.setdefault("DJANGO_CONFIGURATION", "Local")
 
     try:
