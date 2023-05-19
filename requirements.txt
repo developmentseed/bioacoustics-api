@@ -31,3 +31,12 @@ coverage==7.2.1
 # Static and Media Storage
 django-storages==1.13.2
 boto3==1.26.89
+
+# ML stuff
+jax==0.4.10
+flax==0.6.10
+librosa==0.10.0.post2
+matplotlib
+soundfile==0.12.1
+matplotlib==3.7.1
+tensorflow==2.13.0-rc0

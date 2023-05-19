@@ -21,6 +21,7 @@ class Common(Configuration):
         # Your apps
         'bioacoustics.users',
         'bioacoustics.milvus',
+        'bioacoustics.melspectrogram',
     )
 
     # https://docs.djangoproject.com/en/2.0/topics/http/middleware/
