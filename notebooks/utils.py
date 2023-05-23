@@ -69,16 +69,17 @@ def prep_data_from_file(dataset_filename):
     return data
 
 
-def extract_sample_data(): 
+def extract_sample_data(file_ids=[]): 
     if not os.path.exists(EMBEDDINGS_DIR): 
         os.system('gsutil -m cp -r "gs://a20_dropbox/point_one_percent_embeddings" .')
     data = [
         prep_data_from_file(f"point_one_percent_embeddings/a2o_sample_embeddings-0000{i}-of-00007") 
-        for i in range(0,7)
+        for i in (file_ids if file_ids else range(0,7))
     ]
 
     # flatten 2 list for of records 
-    return [record for _data in data for record in _data]
+    flattened = [record for _data in data for record in _data]
+    return [{**r, "id":i} for i, r in enumerate(flattened)]
 
 # helper function to batch data: 
 def split_into_batches(data, n=10_000): 
