@@ -207,3 +207,6 @@ class Common(Configuration):
             'rest_framework.authentication.TokenAuthentication',
         )
     }
+
+    # Additional services
+    EMBED_SERVICE_URL = os.getenv('EMBED_SERVICE_URL', 'http://34.173.121.103/embed')
