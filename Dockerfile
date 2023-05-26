@@ -1,6 +1,11 @@
 FROM python:3.9
 ENV PYTHONUNBUFFERED 1
 
+RUN apt-get -qq -y update \
+    && apt-get install -y libgeos-dev python3-gdal postgresql-client libpq-dev \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+
 # Allows docker to cache installed dependencies between builds
 COPY ./requirements.txt requirements.txt
 RUN pip install -r requirements.txt
