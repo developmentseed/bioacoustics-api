@@ -210,3 +210,5 @@ class Common(Configuration):
 
     # Additional services
     EMBED_SERVICE_URL = os.getenv('EMBED_SERVICE_URL', 'http://34.173.121.103/embed')
+    A2O_API_URL = os.getenv('A2O_API_URL', 'https://api.acousticobservatory.org')
+    A2O_API_TOKEN = os.getenv('A2O_API_TOKEN')
