@@ -17,4 +17,4 @@ WORKDIR code
 EXPOSE 8000
 
 # Run the production server
-CMD gunicorn --bind 0.0.0.0:$PORT --access-logfile - bioacoustics.wsgi:application
+CMD gunicorn --bind 0.0.0.0:8000 --access-logfile - bioacoustics.wsgi:application
