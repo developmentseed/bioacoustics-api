@@ -27,6 +27,7 @@ class Common(Configuration):
     MIDDLEWARE = (
         'django.middleware.security.SecurityMiddleware',
         'django.contrib.sessions.middleware.SessionMiddleware',
+        'corsheaders.middleware.CorsMiddleware',
         'django.middleware.common.CommonMiddleware',
         'django.middleware.csrf.CsrfViewMiddleware',
         'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -76,6 +77,8 @@ class Common(Configuration):
     USE_L10N = True
     USE_TZ = True
     LOGIN_REDIRECT_URL = '/'
+    APPEND_SLASH = True
+    CORS_ALLOW_ALL_ORIGINS = True
 
     # Static files (CSS, JavaScript, Images)
     # https://docs.djangoproject.com/en/2.0/howto/static-files/
