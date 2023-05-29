@@ -59,6 +59,7 @@ class Common(Configuration):
 
     MILVUS = {
         'DB_ALIAS': os.getenv('MILVUS_DB_ALIAS', 'bioacoustics'),
+        'DB_COLLECTION': os.getenv('MILVUS_DB_COLLECTION', 'a2o_bioacoustics'),
         'DB_HOST': os.getenv('MILVUS_DB_HOST', 'localhost'),
         'DB_PORT': os.getenv('MILVUS_DB_PORT', 19530),
         'DB_USER': os.getenv('MILVUS_DB_USER'),
@@ -206,3 +207,8 @@ class Common(Configuration):
             'rest_framework.authentication.TokenAuthentication',
         )
     }
+
+    # Additional services
+    EMBED_SERVICE_URL = os.getenv('EMBED_SERVICE_URL', 'http://34.173.121.103/embed')
+    A2O_API_URL = os.getenv('A2O_API_URL', 'https://api.acousticobservatory.org')
+    A2O_API_TOKEN = os.getenv('A2O_API_TOKEN')
