@@ -34,3 +34,4 @@ boto3==1.26.89
 
 # Requests
 requests==2.30.0
+django-cors-headers==4.0.0
