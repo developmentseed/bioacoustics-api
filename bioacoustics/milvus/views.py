@@ -10,9 +10,13 @@ from .connection import MilvusConnection
 
 
 class EntitySerializer(serializers.Serializer):
+    site_id = serializers.IntegerField()
     site_name = serializers.CharField()
     subsite_name = serializers.CharField()
+    filename = serializers.CharField()
+    file_seq_id = serializers.CharField()
     file_timestamp = serializers.IntegerField()
+    offset = serializers.IntegerField()
 
 
 class ResultSerializer(serializers.Serializer):
@@ -25,7 +29,7 @@ class SearchSerializer(serializers.Serializer):
     audio_file = serializers.FileField()
     limit = serializers.IntegerField(
         min_value=1,
-        max_value=200,
+        max_value=5000,
         required=False,
         allow_null=True
         )
