@@ -13,6 +13,8 @@ django_unique_upload==0.2.1
 
 # Rest apis
 djangorestframework==3.14.0
+pyyaml==6.0
+uritemplate==4.1.1
 
 # Milvus
 pymilvus==2.2.8
