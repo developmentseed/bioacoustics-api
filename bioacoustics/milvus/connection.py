@@ -39,7 +39,15 @@ class MilvusConnection:
             "anns_field": "embedding",
             "param": {"metric_type": "L2", "params": {"nprobe": 16}},
             "limit": limit if limit else 100,
-            "output_fields": ["site_name", "subsite_name", "file_timestamp"]
+            "output_fields": [
+                "site_id",
+                "site_name",
+                "subsite_name",
+                "file_timestamp",
+                "filename",
+                "file_seq_id",
+                "offset"
+            ]
         }
         if expression:
             search_params['expr'] = expression
