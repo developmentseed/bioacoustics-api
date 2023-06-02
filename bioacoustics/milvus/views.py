@@ -23,7 +23,11 @@ class EntitySerializer(serializers.Serializer):
     def get_image_url(self, obj):
         return urljoin(
             settings.A2O_API_URL,
-            'audio_recordings/{}/media.png?end_offset=30&start_offset=0'.format(obj.file_seq_id)
+            'audio_recordings/{}/media.png?start_offset={}&end_offset={}'.format(
+                obj.file_seq_id,
+                obj.offset,
+                obj.offset + 5
+            )
         )
 
 
