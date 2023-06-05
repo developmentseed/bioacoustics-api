@@ -1,4 +1,6 @@
 from urllib.parse import urljoin
+import faiss
+from numpy import array
 import requests
 
 from django.conf import settings
@@ -9,6 +11,8 @@ from rest_framework import serializers
 
 from .connection import MilvusConnection
 
+pca_matrix = faiss.read_VectorTransform('./bioacoustics/milvus/1280_to_256_dimensionality_reduction.pca')
+
 
 class EntitySerializer(serializers.Serializer):
     site_id = serializers.IntegerField()
@@ -17,7 +21,8 @@ class EntitySerializer(serializers.Serializer):
     filename = serializers.CharField()
     file_seq_id = serializers.CharField()
     file_timestamp = serializers.IntegerField()
-    offset = serializers.IntegerField()
+    file_seconds_since_midnight = serializers.IntegerField()
+    clip_offset_in_file = serializers.IntegerField()
     image_url = serializers.SerializerMethodField()
 
     def get_image_url(self, obj):
@@ -25,8 +30,8 @@ class EntitySerializer(serializers.Serializer):
             settings.A2O_API_URL,
             'audio_recordings/{}/media.png?start_offset={}&end_offset={}'.format(
                 obj.file_seq_id,
-                obj.offset,
-                obj.offset + 5
+                obj.clip_offset_in_file,
+                obj.clip_offset_in_file + 5
             )
         )
 
@@ -75,11 +80,12 @@ def search_view(request):
         return Response(embed_data, 400)
 
     m = MilvusConnection()
+    search_vector = pca_transform(embed_data['embedding'])
     results = m.search(
-        embed_data['embedding'],
+        search_vector,
         search_params.get('expression'),
         search_params.get('limit')
-        )
+    )
     serializer = ResultSerializer(results[0], many=True)
 
     return Response(serializer.data)
@@ -93,3 +99,10 @@ def get_embedding(audio_file):
         files=files,
     )
     return [req.status_code, req.json()]
+
+
+def pca_transform(embedding):
+    """Tranform the search vector from 1280 to 256 dimension numpy array."""
+    embed_np = array(embedding).astype('float32')
+    reduced_search_vectors = pca_matrix.apply(embed_np[0])
+    return reduced_search_vectors
