@@ -35,7 +35,7 @@ class MilvusConnection:
     def search(self, query_vector, expression=None, limit=100):
         # Search the Milvus collection for similar vectors
         search_params = {
-            "data": query_vector[0],
+            "data": query_vector,
             "anns_field": "embedding",
             "param": {"metric_type": "L2", "params": {"nprobe": 16}},
             "limit": limit if limit else 100,
@@ -44,9 +44,10 @@ class MilvusConnection:
                 "site_name",
                 "subsite_name",
                 "file_timestamp",
+                "file_seconds_since_midnight",
                 "filename",
                 "file_seq_id",
-                "offset"
+                "clip_offset_in_file"
             ]
         }
         if expression:
