@@ -1,3 +1,4 @@
+from urllib.parse import urljoin
 import requests
 
 from django.conf import settings
@@ -17,6 +18,17 @@ class EntitySerializer(serializers.Serializer):
     file_seq_id = serializers.CharField()
     file_timestamp = serializers.IntegerField()
     offset = serializers.IntegerField()
+    image_url = serializers.SerializerMethodField()
+
+    def get_image_url(self, obj):
+        return urljoin(
+            settings.A2O_API_URL,
+            'audio_recordings/{}/media.png?start_offset={}&end_offset={}'.format(
+                obj.file_seq_id,
+                obj.offset,
+                obj.offset + 5
+            )
+        )
 
 
 class ResultSerializer(serializers.Serializer):
@@ -32,12 +44,12 @@ class SearchSerializer(serializers.Serializer):
         max_value=5000,
         required=False,
         allow_null=True
-        )
+    )
     expression = serializers.CharField(
         required=False,
         allow_blank=True,
         allow_null=True
-        )
+    )
 
 
 @api_view(['POST'])
