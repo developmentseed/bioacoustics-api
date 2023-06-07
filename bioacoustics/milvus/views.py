@@ -50,6 +50,12 @@ class SearchSerializer(serializers.Serializer):
         required=False,
         allow_null=True
     )
+    offset = serializers.IntegerField(
+        min_value=0,
+        max_value=5000,
+        required=False,
+        allow_null=True
+    )
     expression = serializers.CharField(
         required=False,
         allow_blank=True,
@@ -64,6 +70,7 @@ def search_view(request):
     data = {
         'audio_file': request.FILES.get('audio_file'),
         'limit': request.data.get('limit'),
+        'offset': request.data.get('offset'),
         'expression': request.data.get('expression')
     }
     search = SearchSerializer(data=data)
@@ -84,7 +91,8 @@ def search_view(request):
     results = m.search(
         search_vector,
         search_params.get('expression'),
-        search_params.get('limit')
+        search_params.get('limit'),
+        search_params.get('offset')
     )
     serializer = ResultSerializer(results[0], many=True)
 

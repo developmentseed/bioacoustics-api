@@ -32,12 +32,16 @@ class MilvusConnection:
         self.collection.create_index(field, index_params)
         print(f"Created index {self.collection.index().params}")
 
-    def search(self, query_vector, expression=None, limit=100):
-        # Search the Milvus collection for similar vectors
+    def search(self, query_vector, expression=None, limit=100, offset=0):
+        """Search the Milvus collection for similar vectors"""
         search_params = {
             "data": query_vector,
             "anns_field": "embedding",
-            "param": {"metric_type": "L2", "params": {"nprobe": 16}},
+            "param": {
+                "metric_type": "L2",
+                "params": {"nprobe": 16},
+                "offset": offset if offset else 0
+            },
             "limit": limit if limit else 100,
             "output_fields": [
                 "site_id",
