@@ -24,12 +24,20 @@ class EntitySerializer(serializers.Serializer):
     file_seconds_since_midnight = serializers.IntegerField()
     clip_offset_in_file = serializers.IntegerField()
     image_url = serializers.SerializerMethodField()
+    audio_url = serializers.SerializerMethodField()
 
     def get_image_url(self, obj):
+        return self.format_media_url(obj, 'png')
+
+    def get_audio_url(self, obj):
+        return self.format_media_url(obj, 'flac')
+
+    def format_media_url(self, obj, file_format):
         return urljoin(
             settings.A2O_API_URL,
-            'audio_recordings/{}/media.png?start_offset={}&end_offset={}'.format(
+            'audio_recordings/{}/media.{}?start_offset={}&end_offset={}'.format(
                 obj.file_seq_id,
+                file_format,
                 obj.clip_offset_in_file,
                 obj.clip_offset_in_file + 5
             )
