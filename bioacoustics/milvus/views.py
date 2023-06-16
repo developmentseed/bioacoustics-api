@@ -54,13 +54,11 @@ class SearchSerializer(serializers.Serializer):
     audio_file = serializers.FileField()
     limit = serializers.IntegerField(
         min_value=1,
-        max_value=5000,
+        max_value=17000,
         required=False,
         allow_null=True
     )
     offset = serializers.IntegerField(
-        min_value=0,
-        max_value=5000,
         required=False,
         allow_null=True
     )
