@@ -14,7 +14,8 @@ import requests
 @cache_page(60*60*4)  # 4 hours of cache
 def sites_list(request):
     """Get the list of sites from the Acoustic Observatory data API."""
-    status, data = make_request('sites/')
+    query_params = request.query_params.urlencode()
+    status, data = make_request('sites/?{}'.format(query_params))
     return Response(data, status)
 
 

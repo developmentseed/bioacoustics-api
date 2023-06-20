@@ -8,6 +8,11 @@ class TestA2OProxyViews(APITestCase):
         url = reverse('sites-list')
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data.get('data')), 25)
+        # pass some query params
+        response = self.client.get(url, {'items': 5, 'page': 2, 'direction': 'asc'})
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data.get('data')), 5)
 
     def test_sites_detail(self):
         url = reverse('sites-detail', kwargs={'id': 213})
