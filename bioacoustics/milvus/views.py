@@ -1,5 +1,6 @@
 from urllib.parse import urljoin
 import faiss
+import json
 from numpy import array
 import requests
 
@@ -50,11 +51,16 @@ class ResultSerializer(serializers.Serializer):
     entity = EntitySerializer()
 
 
-class SearchSerializer(serializers.Serializer):
+class EmbedSerializer(serializers.Serializer):
     audio_file = serializers.FileField()
+
+
+class SearchSerializer(serializers.Serializer):
+    audio_file = serializers.FileField(required=False, allow_null=True)
+    embed = serializers.CharField(required=False, allow_null=True)
     limit = serializers.IntegerField(
         min_value=1,
-        max_value=17000,
+        max_value=16384,
         required=False,
         allow_null=True
     )
@@ -68,6 +74,14 @@ class SearchSerializer(serializers.Serializer):
         allow_null=True
     )
 
+    def validate(self, data):
+        if data['embed'] or data['audio_file']:
+            return data
+        else:
+            raise serializers.ValidationError(
+                'embed or audio_file fields can not be both null.'
+            )
+
 
 @api_view(['POST'])
 @permission_classes([AllowAny])
@@ -75,6 +89,7 @@ def search_view(request):
     """Executes a search in the Milvus Database using an audio file as input."""
     data = {
         'audio_file': request.FILES.get('audio_file'),
+        'embed': request.data.get('embed'),
         'limit': request.data.get('limit'),
         'offset': request.data.get('offset'),
         'expression': request.data.get('expression')
@@ -85,15 +100,20 @@ def search_view(request):
         return Response(search.errors, 400)
 
     search_params = {**search.validated_data}
-    status_code, embed_data = get_embedding(
-        search_params.get('audio_file')
-    )
 
-    if status_code != 200:
-        return Response(embed_data, 400)
+    if search_params.get('embed') is None:
+        status_code, embed_data = get_embedding(
+            search_params.get('audio_file')
+        )
+        embed = embed_data['embedding']
+
+        if status_code != 200:
+            return Response(embed_data, 400)
+    else:
+        embed = json.loads(search_params.get('embed'))
 
     m = MilvusConnection()
-    search_vector = pca_transform(embed_data['embedding'])
+    search_vector = pca_transform(embed)
     results = m.search(
         search_vector,
         search_params.get('expression'),
@@ -103,6 +123,25 @@ def search_view(request):
     serializer = ResultSerializer(results[0], many=True)
 
     return Response(serializer.data)
+
+
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def embed_view(request):
+    """Get the embedding array for an audio file."""
+    serializer = EmbedSerializer(data={
+        'audio_file': request.FILES.get('audio_file'),
+    })
+
+    if not serializer.is_valid():
+        return Response(serializer.errors, 400)
+
+    validated_data = {**serializer.validated_data}
+    status_code, embed_data = get_embedding(
+        validated_data.get('audio_file')
+    )
+
+    return Response(embed_data, status_code)
 
 
 def get_embedding(audio_file):

@@ -9,7 +9,7 @@ from rest_framework.permissions import AllowAny
 from rest_framework.schemas import get_schema_view
 
 from .users.views import UserViewSet, UserCreateViewSet
-from .milvus.views import search_view
+from .milvus.views import search_view, embed_view
 from .a2o_api_proxy.urls import urlpatterns
 
 router = DefaultRouter()
@@ -21,6 +21,7 @@ urlpatterns = [
     path('api/v1/', include(router.urls)),
     path('api/v1/a2o/', include(urlpatterns)),
     path('api/v1/search/', search_view),
+    path('api/v1/embed/', embed_view),
     path('api/v1/openapi/', get_schema_view(
         title="Google Bioacoustics API",
         description="API for Google Bioacoustics project",
