@@ -2,6 +2,7 @@ from urllib.parse import urljoin
 
 from django.conf import settings
 from django.views.decorators.cache import cache_page
+from django.http import HttpResponse
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny
 from rest_framework.decorators import api_view, permission_classes
@@ -47,3 +48,29 @@ def make_request(endpoint):
     # verify=False is necessary to bypass SSL Error
     req = requests.get(url, headers=headers, verify=False)
     return [req.status_code, req.json()]
+
+
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def recordings_download(request, id, extension):
+    """
+    Download audio recordings from Acoustic Observatory data API in multiple file formats.
+    """
+    query_params = request.query_params.urlencode()
+    url = urljoin(
+        settings.A2O_API_URL,
+        "audio_recordings/{}/media.{}?{}".format(id, extension, query_params)
+    )
+    print(url)
+
+    response = requests.get(url, stream=True)
+    if response.status_code == 200:
+        print('success')
+        response = HttpResponse(
+            response.iter_content(chunk_size=1024),
+            content_type=response.headers['Content-Type']
+        )
+        response['Content-Disposition'] = 'attachment; filename="{}.{}"'.format(id, extension)
+        return response
+
+    return HttpResponse("Error: Failed to download audio file", status=response.status_code)
