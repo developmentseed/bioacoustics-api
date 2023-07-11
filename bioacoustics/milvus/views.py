@@ -7,8 +7,12 @@ import requests
 from django.conf import settings
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny
+from rest_framework.decorators import parser_classes
+from rest_framework.parsers import FormParser, MultiPartParser
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework import serializers
+from drf_spectacular.utils import extend_schema, OpenApiParameter, OpenApiExample
+from drf_spectacular.types import OpenApiTypes
 
 from .connection import MilvusConnection
 
@@ -55,6 +59,10 @@ class EmbedSerializer(serializers.Serializer):
     audio_file = serializers.FileField()
 
 
+class EmbedResultSerializer(serializers.Serializer):
+    embedding = serializers.ListField()
+
+
 class SearchSerializer(serializers.Serializer):
     audio_file = serializers.FileField(required=False, allow_null=True)
     embed = serializers.CharField(required=False, allow_null=True)
@@ -82,11 +90,17 @@ class SearchSerializer(serializers.Serializer):
                 'embed or audio_file fields can not be both null.'
             )
 
-
+@extend_schema(
+    request=SearchSerializer,
+    responses={200: ResultSerializer(many=True)},
+)
 @api_view(['POST'])
 @permission_classes([AllowAny])
+@parser_classes([FormParser, MultiPartParser])
 def search_view(request):
-    """Executes a search in the Milvus Database using an audio file as input."""
+    """
+    Executes a search in the Milvus Database using an audio file or an embedding as input.
+    """
     data = {
         'audio_file': request.FILES.get('audio_file'),
         'embed': request.data.get('embed'),
@@ -125,10 +139,15 @@ def search_view(request):
     return Response(serializer.data)
 
 
+@extend_schema(
+    request=EmbedSerializer(),
+    responses={200: EmbedResultSerializer},
+)
 @api_view(['POST'])
 @permission_classes([AllowAny])
+@parser_classes([FormParser, MultiPartParser])
 def embed_view(request):
-    """Get the embedding array for an audio file."""
+    """Get the embedding array for an audio file. Audio length must be 5 seconds."""
     serializer = EmbedSerializer(data={
         'audio_file': request.FILES.get('audio_file'),
     })

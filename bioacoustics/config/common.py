@@ -18,6 +18,7 @@ class Common(Configuration):
         # Third party apps
         'rest_framework',            # utilities for rest apis
         'rest_framework.authtoken',  # token authentication
+        'drf_spectacular',           # api-docs improvements 
         # Your apps
         'bioacoustics.users',
         'bioacoustics.milvus',
@@ -209,7 +210,14 @@ class Common(Configuration):
         'DEFAULT_AUTHENTICATION_CLASSES': (
             'rest_framework.authentication.SessionAuthentication',
             'rest_framework.authentication.TokenAuthentication',
-        )
+        ),
+        'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
+    }
+
+    SPECTACULAR_SETTINGS = {
+        'TITLE': 'Google Bioacoustics API',
+        'DESCRIPTION': 'API for Google Bioacoustics project',
+        'VERSION': '1.0.0',
     }
 
     # Additional services
