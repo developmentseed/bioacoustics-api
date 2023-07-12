@@ -7,11 +7,10 @@ import requests
 from django.conf import settings
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny
-from rest_framework.decorators import parser_classes
 from rest_framework.parsers import FormParser, MultiPartParser
-from rest_framework.decorators import api_view, permission_classes
+from rest_framework.decorators import api_view, permission_classes, parser_classes
 from rest_framework import serializers
-from drf_spectacular.utils import extend_schema, OpenApiParameter, OpenApiExample
+from drf_spectacular.utils import extend_schema, extend_schema_field
 from drf_spectacular.types import OpenApiTypes
 
 from .connection import MilvusConnection
@@ -31,9 +30,11 @@ class EntitySerializer(serializers.Serializer):
     image_url = serializers.SerializerMethodField()
     audio_url = serializers.SerializerMethodField()
 
+    @extend_schema_field(OpenApiTypes.STR)
     def get_image_url(self, obj):
         return self.format_media_url(obj, 'png')
 
+    @extend_schema_field(OpenApiTypes.STR)
     def get_audio_url(self, obj):
         return self.format_media_url(obj, 'flac')
 
