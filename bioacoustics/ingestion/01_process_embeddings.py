@@ -40,17 +40,18 @@ if __name__ == "__main__":
         raw_dataset = tf.data.TFRecordDataset(dataset_filename)
         for timestamp_s, filename, embedding, embedding_shape in raw_dataset.map(parse_tfrecord).as_numpy_iterator():
             [(
-                file_datetime, 
-                timezone, 
-                site_name, 
-                subsite_name, 
-                file_seq_id
+            site_id, 
+            file_datetime, 
+            timezone, 
+            site_name, 
+            subsite_name, 
+            file_seq_id
             )] = re.findall(
-                    # I'm quite proud of myself for this regex, but if anyone can see 
-                    # a way to simplify it, please let me know!
-                    r"(?P<datetime>\d{8}T\d{6})(?P<timezone>(?:\+\d{4})|Z)_(?P<site_name>(?:\w*|-)*)-(?P<subsite_name>(?:Wet|Dry)-(?:A|B))_(?P<file_seq_id>\d*).flac",
-                    filename.decode("utf-8")
-                )
+                # I'm quite proud of myself for this regex, but if anyone can see 
+                # a way to simplify it, please let me know!
+                r"site_(?P<site_id>\d{4})\/(?P<datetime>\d{8}T\d{6})(?P<timezone>(?:\+\d{4})|Z)_(?P<site_name>(?:\w*|-)*)-(?P<subsite_name>(?:Wet|Dry)-(?:A|B))_(?P<file_seq_id>\d*).flac",
+                filename.decode("utf-8")
+            )
             
             # Some files have just "Z" as timezone, assume UTC in this case
             timezone = "+0000" if timezone == "Z" else timezone
@@ -74,6 +75,7 @@ if __name__ == "__main__":
                         "file_seconds_since_midnight": file_offset_since_midnight,
                         "recording_offset_in_file": int(timestamp_s + (5*temporal_index)), 
                         "channel_index": channel_index,
+                        "site_id": site_id,
                         "site_name": site_name, 
                         "subsite_name": subsite_name, 
                         "file_seq_id": int(file_seq_id),

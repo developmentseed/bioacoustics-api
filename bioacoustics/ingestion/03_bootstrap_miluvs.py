@@ -21,6 +21,7 @@ FIELD_NAMES = (
     "file_seconds_since_midnight",
     "recording_offset_in_file",
     "channel_index",
+    "site_id",
     "site_name",
     "subsite_name", 
     "file_seq_id", 
@@ -65,9 +66,13 @@ def setup_collection():
         description="Offset (in seconds) from start of file where embedding window starts"
     )
 
+    channel_index_field = FieldSchema(
+        name="chanel_index", dtype=DataType.INT64, description="Channel number for embedding"
+    )
+
     # max len found in 1% sample = 4
     site_id_field = FieldSchema(
-        name="chanel_index", dtype=DataType.INT64, description="Channel number for embedding"
+        name="site_id", dtype=DataType.VARCHAR, description="Site ID", max_length=8
     )
 
     # max len found in 1% sample = 50
@@ -95,6 +100,7 @@ def setup_collection():
             file_timestamp_field,
             file_seconds_since_midnight_field,
             clip_offset_in_file_field, 
+            channel_index_field,
             site_id_field, 
             site_name_field, 
             subsite_name_field, 
