@@ -1,7 +1,7 @@
 import json
 import numpy as np
-import os
 import concurrent.futures
+import utils
 from pymilvus import (
     connections,
     FieldSchema, CollectionSchema, DataType,
@@ -139,18 +139,23 @@ def split_into_batches(data, n=10_000):
     for i in range(0, len(data), n):
         yield data[i:i + n]
 
-def load_data(metadata_file): 
+def load_data(metadata_blob): 
     
-    # TODO: download `metadata_file` from `gs://a20_dropbox/one_percent_sep_embeddings/metadata
-    _metadata = None
+    metadata_file = metadata_blob.name.split("/")[-1]
+    metadata_blob.download_to_filename(metadata_file)
+
     with open(metadata_file, "r") as f: 
         _metadata = json.loads(f.read())
     
-    embeddings_file = metadata_file.split("/")[-1].replace(".json", ".npy")
+    embeddings_blobname = metadata_blob.name.replace(".json", ".npy")
+    embedddings_blob = utils.bucket.blob(embeddings_blobname)
+    
+    embeddings_file = embedddings_blob.name.split("/")[-1]
+    embedddings_blob.download_to_filename(embeddings_file)
+
     # TODO: download `embeddings_filename` from `gs://a20_dropbox/one_percent_sep_embeddings/reduced`
     _embeddings = np.load(embeddings_file)
     
-        
     assert len(_embeddings) == len(_metadata)
     
     data = [
@@ -175,17 +180,15 @@ if __name__ == "__main__":
 
     collection = setup_collection()
 
-    metadata_files = [
-    # TODO: LIST contents of: `gs://a20_dropbox/one_percent_sep_embeddings/metadata`
-    ]
+    metadata_blobs = [b for b in utils.storage_client.list_blobs(utils.EMBEDDINGS_FOLDER)]
         
     with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
         results = list(
             executor.map(
                 lambda x: load_data(x),
-                metadata_files
+                metadata_blobs
             ), 
-            total=len(metadata_files) 
+            total=len(metadata_blobs) 
         
         ) 
 

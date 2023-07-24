@@ -1,17 +1,20 @@
 import os
 import numpy as np
 import faiss
+import utils
 
 PCA_TRAINING_SAMPLE_SIZE = 0.25
 
 if __name__ == "__main__":
-    embeddings_files = [
-    # TODO: LIST contents of: `gs://a20_dropbox/one_percent_sep_embeddings/embeddings`
-    ]
+    
+    embeddings_blobs = [b for b in utils.storage_client.list_blobs(utils.EMBEDDINGS_FOLDER)]
 
     training_set = []
 
-    for embedding_file in embeddings_files: 
+    for embeddings_blob in embeddings_blobs: 
+
+        embedding_file = f"./{embeddings_blob.name.split('/')[-1]}"
+        embeddings_blob.download_to_filename(embedding_file)
 
         embeddings = np.load(embedding_file)
         
@@ -35,16 +38,22 @@ if __name__ == "__main__":
     # train
     mat.train(training_set)
 
-    # write to file
-    faiss.write_VectorTransform(mat, "1280_to_256_dimensionality_reduction.pca")
+    trained_pca_filename = "1280_to_256_dimensionality_reduction.pca"
 
-    # TODO: write `./1280_to_256_dimensionality_reduction.pca` to a location in 
-    # google cloud storage that the API can access
+    # write to file
+    faiss.write_VectorTransform(mat, trained_pca_filename)
+
+    blob = utils.bucket.blob(f"{utils.EMBEDDINGS_FOLDER}/{trained_pca_filename}")
+    blob.update_from_filename(trained_pca_filename)
+
 
     # read trained PCA matrix from file
-    pca_matrix = faiss.read_VectorTransform("1280_to_256_dimensionality_reduction.pca")
+    pca_matrix = faiss.read_VectorTransform(trained_pca_filename)
 
-    for embedding_file in embeddings_files: 
+    for embeddings_blob in embeddings_blobs: 
+
+        embedding_file = f"./{embeddings_blob.name.split('/')[-1]}"
+        embeddings_blob.download_to_filename(embedding_file)
         
         embeddings = np.load(embedding_file)
         
@@ -56,4 +65,6 @@ if __name__ == "__main__":
         
         np.save(f"./{filename}", reduced_embeddings)
 
-        # TODO: write `filename` to `gs://a20_dropbox/one_percent_sep_embeddings/reduced`
+        blob = utils.bucket.blob(f"{utils.EMBEDDINGS_FOLDER}/reduced/{filename}")
+        blob.update_from_filename(filename)
+
