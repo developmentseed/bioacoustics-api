@@ -2,6 +2,7 @@ import json
 import numpy as np
 import concurrent.futures
 import utils
+import tempfile
 from pymilvus import (
     connections,
     FieldSchema, CollectionSchema, DataType,
@@ -141,20 +142,18 @@ def split_into_batches(data, n=10_000):
 
 def load_data(metadata_blob): 
     
-    metadata_file = metadata_blob.name.split("/")[-1]
-    metadata_blob.download_to_filename(metadata_file)
+    with tempfile.NamedTemporaryFile(prefix="/data") as tmpfile: 
+        metadata_blob.download_to_filename(tmpfile.name)
+        with open(tmpfile.name, "r") as f: 
+            _metadata = json.loads(f.read())    
 
-    with open(metadata_file, "r") as f: 
-        _metadata = json.loads(f.read())
     
-    embeddings_blobname = metadata_blob.name.replace(".json", ".npy")
-    embedddings_blob = utils.bucket.blob(embeddings_blobname)
+    embeddings_blobname = metadata_blob.name.split("/")[-1].replace(".json", ".npy")
+    embedddings_blob = utils.bucket.blob(f"{utils.EMBEDDINGS_FOLDER}_reduced_vector/{embeddings_blobname}")
     
-    embeddings_file = embedddings_blob.name.split("/")[-1]
-    embedddings_blob.download_to_filename(embeddings_file)
-
-    # TODO: download `embeddings_filename` from `gs://a20_dropbox/one_percent_sep_embeddings/reduced`
-    _embeddings = np.load(embeddings_file)
+    with tempfile.NamedTemporaryFile(prefix="/data") as tmpfile: 
+        embedddings_blob.download_to_filename(tmpfile.name)
+        _embeddings = np.load(tmpfile.name)
     
     assert len(_embeddings) == len(_metadata)
     
@@ -180,7 +179,7 @@ if __name__ == "__main__":
 
     collection = setup_collection()
 
-    metadata_blobs = [b for b in utils.storage_client.list_blobs(utils.EMBEDDINGS_FOLDER)]
+    metadata_blobs = [b for b in utils.storage_client.list_blobs(f"{utils.EMBEDDINGS_FOLDER}_metadata")]
         
     with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
         results = list(

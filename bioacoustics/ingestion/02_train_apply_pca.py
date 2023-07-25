@@ -2,6 +2,7 @@ import os
 import numpy as np
 import faiss
 import utils
+import tempfile
 
 PCA_TRAINING_SAMPLE_SIZE = 0.25
 
@@ -13,10 +14,9 @@ if __name__ == "__main__":
 
     for embeddings_blob in embeddings_blobs: 
 
-        embedding_file = f"./{embeddings_blob.name.split('/')[-1]}"
-        embeddings_blob.download_to_filename(embedding_file)
-
-        embeddings = np.load(embedding_file)
+        with tempfile.NamedTemporaryFile(prefix="/data") as tmpfile: 
+            embeddings_blob.download_to_filename(tmpfile.name)
+            embeddings = np.load(tmpfile.name)
         
         # select random subset by generated random indexes to select
         rand_indexes = np.random.randint(
@@ -33,38 +33,37 @@ if __name__ == "__main__":
     training_set = np.array(training_set)
 
     # define PCA matrix
-    mat = faiss.PCAMatrix(1280, 256)
+    pca_matrix = faiss.PCAMatrix(1280, 256)
 
     # train
-    mat.train(training_set)
-
-    trained_pca_filename = "1280_to_256_dimensionality_reduction.pca"
+    pca_matrix.train(training_set)
 
     # write to file
-    faiss.write_VectorTransform(mat, trained_pca_filename)
+    with tempfile.NamedTemporaryFile(prefix="/data") as tmpfile: 
+    
+        faiss.write_VectorTransform(pca_matrix, tmpfile.name)
+        blob = utils.bucket.blob(f"{utils.EMBEDDINGS_FOLDER}/1280_to_256_dimensionality_reduction.pca")
+        blob.update_from_filename(tmpfile.name)
 
-    blob = utils.bucket.blob(f"{utils.EMBEDDINGS_FOLDER}/{trained_pca_filename}")
-    blob.update_from_filename(trained_pca_filename)
 
-
-    # read trained PCA matrix from file
-    pca_matrix = faiss.read_VectorTransform(trained_pca_filename)
-
+        
     for embeddings_blob in embeddings_blobs: 
 
-        embedding_file = f"./{embeddings_blob.name.split('/')[-1]}"
-        embeddings_blob.download_to_filename(embedding_file)
-        
-        embeddings = np.load(embedding_file)
+        with tempfile.NamedTemporaryFile(prefix="/data") as tmpfile: 
+            embeddings_blob.download_to_filename(tmpfile.name)
+            embeddings = np.load(tmpfile.name)
         
         # apply the dimensionality reduction using the PCA matrix
         reduced_embeddings = pca_matrix.apply(embeddings)
         
-        # write the reduced embeddings to disk
-        filename = embedding_file.split("/")[-1]
+        reduced_vector_blob_name = embeddings_blob.split("/")[-1]
+
+        with tempfile.NamedTemporaryFile(prefix="/data") as tmpfile: 
+            np.save(tmpfile.name, reduced_embeddings)
+            blob = utils.bucket.blob(f"{utils.EMBEDDINGS_FOLDER}_reduced_vector/{reduced_vector_blob_name}")
+            blob.update_from_filename(tmpfile.name)
         
-        np.save(f"./{filename}", reduced_embeddings)
+        
 
-        blob = utils.bucket.blob(f"{utils.EMBEDDINGS_FOLDER}/reduced/{filename}")
-        blob.update_from_filename(filename)
-
+       
+       

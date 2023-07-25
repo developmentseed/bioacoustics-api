@@ -3,6 +3,7 @@ import re
 import datetime
 import json
 import numpy as np
+import tempfile
 
 # Set this environment variable before loading the tensorflow 
 # library to squash warning
@@ -89,31 +90,14 @@ if __name__ == "__main__":
         # extract filename, removes extension
         stripped_filename = local_filename.split('.')[0]
         
-        # prep filepaths for generated files
-        metadata_filename = f"./{stripped_filename}.json"
-        numpy_filename = f"./{stripped_filename}.npy"
+        with tempfile.NamedTemporaryFile(prefix="/data") as tmpfile: 
+            tmpfile.write(json.dumps(metadata))
+            metadata_blob = utils.bucket.blob(f"{utils.EMBEDDINGS_FOLDER}_metadata/{stripped_filename}.json")
+            metadata_blob.update_from_filename(tmpfile.name)
         
-        # write metadata to disk
-        with open(metadata_filename, "w") as f: 
-            f.write(json.dumps(metadata))
-        
-        # write embeddings to distk
-        np.save(numpy_filename, embeddings)
-
-        metadata_blob = utils.bucket.blob(f"{utils.EMBEDDINGS_FOLDER}/metadata/{metadata_filename}")
-        metadata_blob.update_from_filename(metadata_filename)
-        
-        numpy_blob = utils.bucket.blob(f"{utils.EMBEDDINGS_FOLDER}/embeddings/{numpy_filename}")
-        numpy_blob.update_from_filename(numpy_filename)
-
-
-        # TODO: write `metadata_filename` to `gs://a20_dropbox/one_percent_sep_embeddings/metadata`
-        # TODO: write `numpy_filename` to `gs://a20_dropbox/one_percent_sep_embeddings/embeddings`
-
-        # NOTE: these two lines remove the files from local memory after they have been written 
-        # to google cloud storage. This is important because there is about 350Gb worth of emebddings
-        # in the gs bucket.
-        os.remove(numpy_filename)
-        os.remove(metadata_filename)
+        with tempfile.NamedTemporaryFile(prefix="/data") as tmpfile: 
+            np.save(tmpfile.name, embeddings)
+            numpy_blob = utils.bucket.blob(f"{utils.EMBEDDINGS_FOLDER}_vector/{stripped_filename}.npy")
+            numpy_blob.update_from_filename(tmpfile.name)
                 
     print(f"Total number of data records: {count}")
