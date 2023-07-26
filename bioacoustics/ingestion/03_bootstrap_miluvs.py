@@ -3,6 +3,7 @@ import numpy as np
 import concurrent.futures
 import utils
 import tempfile
+import sys
 from pymilvus import (
     connections,
     FieldSchema, CollectionSchema, DataType,
@@ -29,12 +30,12 @@ FIELD_NAMES = (
     "filename"
 )
 
-def setup_collection():
+def setup_collection(overwrite_collection_flag:bool = False):
     # # Drop collection if exists - PROCEED WITH CAUTION!!
-    # if utility.has_collection(COLLECTION_NAME): 
-    #     print("Collection exists, dropping...")
-    #     collection = Collection(COLLECTION_NAME)
-    #     collection.drop()
+    if overwrite_collection_flag and utility.has_collection(COLLECTION_NAME): 
+        print("Collection exists, dropping...")
+        collection = Collection(COLLECTION_NAME)
+        collection.drop()
 
     # define collection fields
     id_field = FieldSchema(
@@ -174,10 +175,13 @@ def load_data(metadata_blob):
     return len(_embeddings)
 
 if __name__ == "__main__":
+
+    overwrite_collection_flag = sys.argv[1].lower() == "true"
+
     connections.connect(host=HOST, port=PORT)
     print("Connections: ", connections.list_connections())
 
-    collection = setup_collection()
+    collection = setup_collection(overwrite_collection_flag)
 
     metadata_blobs = [b for b in utils.storage_client.list_blobs(f"{utils.EMBEDDINGS_FOLDER}_metadata")]
         
