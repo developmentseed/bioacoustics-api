@@ -4,7 +4,7 @@ import faiss
 import utils
 import tempfile
 
-PCA_TRAINING_SAMPLE_SIZE = 0.25
+PCA_TRAINING_SAMPLE_SIZE = 0.05
 
 if __name__ == "__main__":
     
