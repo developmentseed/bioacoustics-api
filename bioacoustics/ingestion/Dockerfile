@@ -7,4 +7,4 @@ COPY ./* .
 RUN pip install --upgrade pip
 RUN pip install -r requirements.txt
 
-CMD ["bash", "./run.sh"]
+CMD ["bash", "./run.sh", "--overwrite-collection"]

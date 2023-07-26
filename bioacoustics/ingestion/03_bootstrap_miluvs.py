@@ -176,7 +176,10 @@ def load_data(metadata_blob):
 
 if __name__ == "__main__":
 
-    overwrite_collection_flag = sys.argv[1].lower() == "true"
+    if len(sys.argv) > 1 and sys.argv[1].lower() == "--overwrite-collection":
+        overwrite_collection_flag = True
+    else:
+        overwrite_collection_flag = False
 
     connections.connect(host=HOST, port=PORT)
     print("Connections: ", connections.list_connections())
