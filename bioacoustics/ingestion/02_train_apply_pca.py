@@ -42,7 +42,7 @@ if __name__ == "__main__":
     with tempfile.NamedTemporaryFile(prefix="/data") as tmpfile: 
     
         faiss.write_VectorTransform(pca_matrix, tmpfile.name)
-        blob = utils.bucket.blob(f"{utils.EMBEDDINGS_FOLDER}/1280_to_256_dimensionality_reduction.pca")
+        blob = utils.bucket.blob(f"{utils.EMBEDDINGS_FOLDER}_admin/1280_to_256_dimensionality_reduction.pca")
         blob.update_from_filename(tmpfile.name)
 
 
