@@ -1,4 +1,5 @@
 import json
+import os
 import numpy as np
 import concurrent.futures
 import utils
@@ -11,8 +12,8 @@ from pymilvus import (
     utility
 )
 
-HOST = "" # TODO 
-PORT = 0 # TODO
+HOST = os.environ.get("MILVUS_DB_HOST", "localhost")
+PORT = os.environ.get("MILVUS_DB_PORT", 19530)
 
 COLLECTION_NAME = "a2o_bioacoustics"
 
