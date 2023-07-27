@@ -1,4 +1,7 @@
-#! /bin/bash    
+#! /bin/bash
+
+# Exit immediately if any command fails
+set -e
 
 python 01_process_embeddings.py
 python 02_train_apply_pca.py

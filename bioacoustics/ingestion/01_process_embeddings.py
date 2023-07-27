@@ -29,7 +29,7 @@ def parse_tfrecord(example_proto):
     
     return features['timestamp_s'], features["filename"], embedding, features["embedding_shape"]
 
-if __name__ == "__main__": 
+if __name__ == "__main__":
 
     sample_data_blobs = [b for b in utils.storage_client.list_blobs(utils.EMBEDDINGS_FOLDER)]
 
