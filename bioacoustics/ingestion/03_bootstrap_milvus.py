@@ -187,7 +187,11 @@ if __name__ == "__main__":
 
     collection = setup_collection(overwrite_collection_flag)
 
-    metadata_blobs = [b for b in utils.storage_client.list_blobs(f"{utils.EMBEDDINGS_FOLDER}_metadata")]
+    metadata_blobs = [
+        b for b in utils.storage_client.list_blobs(
+            utils.BUCKET_NAME,  prefix=f"{utils.EMBEDDINGS_FOLDER}_metadata"
+        )
+    ]
         
     with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
         results = list(

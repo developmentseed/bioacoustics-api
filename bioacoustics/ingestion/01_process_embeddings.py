@@ -31,7 +31,9 @@ def parse_tfrecord(example_proto):
 
 if __name__ == "__main__":
 
-    sample_data_blobs = [b for b in utils.storage_client.list_blobs(utils.EMBEDDINGS_FOLDER)]
+    sample_data_blobs = [
+        b for b in utils.storage_client.list_blobs(utils.BUCKET_NAME, prefix=utils.EMBEDDINGS_FOLDER)
+    ]
 
     print(f"{len(sample_data_blobs)} files to process found")
 
@@ -93,11 +95,11 @@ if __name__ == "__main__":
         with tempfile.NamedTemporaryFile(prefix="/data") as tmpfile: 
             tmpfile.write(json.dumps(metadata))
             metadata_blob = utils.bucket.blob(f"{utils.EMBEDDINGS_FOLDER}_metadata/{stripped_filename}.json")
-            metadata_blob.update_from_filename(tmpfile.name)
+            metadata_blob.upload_from_filename(tmpfile.name)
         
         with tempfile.NamedTemporaryFile(prefix="/data") as tmpfile: 
             np.save(tmpfile.name, embeddings)
             numpy_blob = utils.bucket.blob(f"{utils.EMBEDDINGS_FOLDER}_vector/{stripped_filename}.npy")
-            numpy_blob.update_from_filename(tmpfile.name)
+            numpy_blob.upload_from_filename(tmpfile.name)
                 
     print(f"Total number of data records: {count}")

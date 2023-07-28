@@ -8,7 +8,9 @@ PCA_TRAINING_SAMPLE_SIZE = 0.05
 
 if __name__ == "__main__":
     
-    embeddings_blobs = [b for b in utils.storage_client.list_blobs(utils.EMBEDDINGS_FOLDER)]
+    embeddings_blobs = [
+        b for b in utils.storage_client.list_blobs(utils.BUCKET_NAME, prefix=utils.EMBEDDINGS_FOLDER)
+    ]
 
     training_set = []
 
@@ -43,7 +45,7 @@ if __name__ == "__main__":
     
         faiss.write_VectorTransform(pca_matrix, tmpfile.name)
         blob = utils.bucket.blob(f"{utils.EMBEDDINGS_FOLDER}_admin/1280_to_256_dimensionality_reduction.pca")
-        blob.update_from_filename(tmpfile.name)
+        blob.upload_from_filename(tmpfile.name)
 
 
         
@@ -61,7 +63,7 @@ if __name__ == "__main__":
         with tempfile.NamedTemporaryFile(prefix="/data") as tmpfile: 
             np.save(tmpfile.name, reduced_embeddings)
             blob = utils.bucket.blob(f"{utils.EMBEDDINGS_FOLDER}_reduced_vector/{reduced_vector_blob_name}")
-            blob.update_from_filename(tmpfile.name)
+            blob.upload_from_filename(tmpfile.name)
         
         
 
