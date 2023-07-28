@@ -39,12 +39,14 @@ if __name__ == "__main__":
 
     count = 0
     for blob in sample_data_blobs: 
-        local_filename = f"./{blob.name.split('/')[-1]}"
-        blob.download_to_filename(local_filename)
-        
         embeddings =[]
         metadata = []
-        raw_dataset = tf.data.TFRecordDataset(local_filename)
+        with tempfile.NamedTemporaryFile(prefix="/data") as tmpfile: 
+            metadata_blob.upload_from_filename(tmpfile.name)
+            blob.download_to_filename(tmpfile.name)
+            raw_dataset = tf.data.TFRecordDataset(tmpfile.name)
+
+
         for timestamp_s, filename, embedding, embedding_shape in raw_dataset.map(parse_tfrecord).as_numpy_iterator():
             [(
             site_id, 
