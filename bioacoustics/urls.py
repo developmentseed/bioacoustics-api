@@ -10,7 +10,7 @@ from rest_framework.schemas import get_schema_view
 from drf_spectacular.views import SpectacularAPIView
 
 from .users.views import UserViewSet, UserCreateViewSet
-from .milvus.views import search_view, embed_view
+from .milvus.views import search_view, embed_view, upload_audio_view, capabilities
 from .a2o_api_proxy.urls import urlpatterns
 
 router = DefaultRouter()
@@ -23,6 +23,8 @@ urlpatterns = [
     path('api/v1/a2o/', include(urlpatterns)),
     path('api/v1/search/', search_view),
     path('api/v1/embed/', embed_view),
+    path('api/v1/upload-audio/', upload_audio_view),
+    path('api/v1/capabilities/', capabilities),
     path('api/v1/openapi/', SpectacularAPIView.as_view(), name='openapi-schema'),
     path('api-token-auth/', views.obtain_auth_token),
     path('api-auth/', include('rest_framework.urls', namespace='rest_framework')),

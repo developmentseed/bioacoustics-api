@@ -34,7 +34,7 @@ coverage==7.2.1
 
 # Static and Media Storage
 django-storages==1.13.2
-boto3==1.26.89
+minio==7.1.15
 
 # Requests
 requests==2.30.0
