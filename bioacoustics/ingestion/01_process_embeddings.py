@@ -35,7 +35,7 @@ def parse_tfrecord(example_proto):
     return features['timestamp_s'], features["filename"], embedding, features["embedding_shape"]
 
 def process(blob): 
-
+    count = 0
     embeddings =[]
     metadata = []
     with tempfile.NamedTemporaryFile(prefix="/data") as tmpfile: 
