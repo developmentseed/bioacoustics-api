@@ -1,4 +1,4 @@
-import os
+import logging
 import numpy as np
 import faiss
 import utils
@@ -6,8 +6,11 @@ import tempfile
 
 PCA_TRAINING_SAMPLE_SIZE = 0.05
 
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
 if __name__ == "__main__":
-    
+    logger.info("Starting PCA training...")
     embeddings_blobs = [
         b for b in utils.storage_client.list_blobs(utils.BUCKET_NAME, prefix=utils.EMBEDDINGS_FOLDER)
     ]
@@ -47,10 +50,12 @@ if __name__ == "__main__":
         blob = utils.bucket.blob(f"{utils.EMBEDDINGS_FOLDER}_admin/1280_to_256_dimensionality_reduction.pca")
         blob.upload_from_filename(tmpfile.name)
 
+    logger.info("Finished PCA training ...")
+
 
         
     for embeddings_blob in embeddings_blobs: 
-
+        logger.info(f"Applying dimensionality reduction to {embeddings_blob}")
         with tempfile.NamedTemporaryFile(prefix="/data") as tmpfile: 
             embeddings_blob.download_to_filename(tmpfile.name)
             embeddings = np.load(tmpfile.name)
@@ -64,8 +69,3 @@ if __name__ == "__main__":
             np.save(tmpfile.name, reduced_embeddings)
             blob = utils.bucket.blob(f"{utils.EMBEDDINGS_FOLDER}_reduced_vector/{reduced_vector_blob_name}")
             blob.upload_from_filename(tmpfile.name)
-        
-        
-
-       
-       

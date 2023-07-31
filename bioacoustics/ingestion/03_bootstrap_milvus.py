@@ -1,4 +1,5 @@
 import json
+import logging
 import os
 import numpy as np
 import concurrent.futures
@@ -11,6 +12,10 @@ from pymilvus import (
     Collection,
     utility
 )
+
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 HOST = os.environ.get("MILVUS_DB_HOST", "localhost")
 PORT = os.environ.get("MILVUS_DB_PORT", 19530)
@@ -34,7 +39,7 @@ FIELD_NAMES = (
 def setup_collection(overwrite_collection_flag:bool = False):
     # # Drop collection if exists - PROCEED WITH CAUTION!!
     if overwrite_collection_flag and utility.has_collection(COLLECTION_NAME): 
-        print("Collection exists, dropping...")
+        logger.info("Collection exists, dropping...")
         collection = Collection(COLLECTION_NAME)
         collection.drop()
 
@@ -123,9 +128,9 @@ def setup_collection(overwrite_collection_flag:bool = False):
         properties={"collection.ttl.seconds": 0}
     )
 
-    print(f"Collections: {utility.list_collections()}")
+    logger.info(f"Collections: {utility.list_collections()}")
 
-    print(f"Creating new index: IVF_SQ8 with params nlist:4096")
+    logger.info(f"Creating new index: IVF_SQ8 with params nlist:4096")
     # create new index: 
     index_params = {
         "index_type": "IVF_SQ8",
@@ -183,7 +188,7 @@ if __name__ == "__main__":
         overwrite_collection_flag = False
 
     connections.connect(host=HOST, port=PORT)
-    print("Connections: ", connections.list_connections())
+    logger.info("Connections: ", connections.list_connections())
 
     collection = setup_collection(overwrite_collection_flag)
 
@@ -203,5 +208,5 @@ if __name__ == "__main__":
         
         ) 
 
-    print(f"Collection {COLLECTION_NAME} currently loaded with {collection.num_entities} entities")
+    logger.info(f"Collection {COLLECTION_NAME} currently loaded with {collection.num_entities} entities")
         
