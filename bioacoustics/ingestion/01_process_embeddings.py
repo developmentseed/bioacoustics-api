@@ -97,8 +97,8 @@ def process(blob):
         metadata_blob.upload_from_filename(tmpfile.name)
         tmpfile.close()
     
-    with tempfile.NamedTemporaryFile(prefix="/data") as tmpfile: 
-        np.save(tmpfile.name, embeddings)
+    with tempfile.NamedTemporaryFile(prefix="/data/") as tmpfile: 
+        np.save(tmpfile, embeddings)
         numpy_blob = utils.bucket.blob(f"{utils.EMBEDDINGS_FOLDER}_vector/{stripped_filename}.npy")
         numpy_blob.upload_from_filename(tmpfile.name)
         tmpfile.close()
