@@ -45,50 +45,49 @@ if __name__ == "__main__":
             blob.download_to_filename(tmpfile.name)
             raw_dataset = tf.data.TFRecordDataset(tmpfile.name)
 
+            for timestamp_s, filename, embedding, embedding_shape in raw_dataset.map(parse_tfrecord).as_numpy_iterator():
+                [(
+                site_id, 
+                file_datetime, 
+                timezone, 
+                site_name, 
+                subsite_name, 
+                file_seq_id
+                )] = re.findall(
+                    # I'm quite proud of myself for this regex, but if anyone can see 
+                    # a way to simplify it, please let me know!
+                    r"site_(?P<site_id>\d{4})\/(?P<datetime>\d{8}T\d{6})(?P<timezone>(?:\+\d{4})|Z)_(?P<site_name>(?:\w*|-)*)-(?P<subsite_name>(?:Wet|Dry)-(?:A|B))_(?P<file_seq_id>\d*).flac",
+                    filename.decode("utf-8")
+                )
+                
+                # Some files have just "Z" as timezone, assume UTC in this case
+                timezone = "+0000" if timezone == "Z" else timezone
+                file_datetime = datetime.datetime.strptime(f"{file_datetime}{timezone}", "%Y%m%dT%H%M%S%z")
+                midnight = file_datetime.replace(hour=0, minute=0, second=0)
+                file_offset_since_midnight = (file_datetime - midnight).seconds
+                
+                # `embedding` is a 3D array with Dims [12,5,1280]
+                # The first dimension, [0:11] is the distinct 5 second windows
+                # within a 60 second period.
+                # The second dimension [0:4] is the 5 different audio channels
+                # (4 separated + 1 combined audio channel)
+                for temporal_index, embedding_channels in enumerate(embedding):
+                    for channel_index, _embedding in enumerate(embedding_channels): 
+                        
+                        count +=1
 
-        for timestamp_s, filename, embedding, embedding_shape in raw_dataset.map(parse_tfrecord).as_numpy_iterator():
-            [(
-            site_id, 
-            file_datetime, 
-            timezone, 
-            site_name, 
-            subsite_name, 
-            file_seq_id
-            )] = re.findall(
-                # I'm quite proud of myself for this regex, but if anyone can see 
-                # a way to simplify it, please let me know!
-                r"site_(?P<site_id>\d{4})\/(?P<datetime>\d{8}T\d{6})(?P<timezone>(?:\+\d{4})|Z)_(?P<site_name>(?:\w*|-)*)-(?P<subsite_name>(?:Wet|Dry)-(?:A|B))_(?P<file_seq_id>\d*).flac",
-                filename.decode("utf-8")
-            )
-            
-            # Some files have just "Z" as timezone, assume UTC in this case
-            timezone = "+0000" if timezone == "Z" else timezone
-            file_datetime = datetime.datetime.strptime(f"{file_datetime}{timezone}", "%Y%m%dT%H%M%S%z")
-            midnight = file_datetime.replace(hour=0, minute=0, second=0)
-            file_offset_since_midnight = (file_datetime - midnight).seconds
-            
-            # `embedding` is a 3D array with Dims [12,5,1280]
-            # The first dimension, [0:11] is the distinct 5 second windows
-            # within a 60 second period.
-            # The second dimension [0:4] is the 5 different audio channels
-            # (4 separated + 1 combined audio channel)
-            for temporal_index, embedding_channels in enumerate(embedding):
-                for channel_index, _embedding in enumerate(embedding_channels): 
-                    
-                    count +=1
-
-                    embeddings.append(_embedding)
-                    metadata.append({
-                        "file_timestamp": int(file_datetime.timestamp()),
-                        "file_seconds_since_midnight": file_offset_since_midnight,
-                        "recording_offset_in_file": int(timestamp_s + (5*temporal_index)), 
-                        "channel_index": channel_index,
-                        "site_id": site_id,
-                        "site_name": site_name, 
-                        "subsite_name": subsite_name, 
-                        "file_seq_id": int(file_seq_id),
-                        "filename": filename.decode("utf-8")
-                    })
+                        embeddings.append(_embedding)
+                        metadata.append({
+                            "file_timestamp": int(file_datetime.timestamp()),
+                            "file_seconds_since_midnight": file_offset_since_midnight,
+                            "recording_offset_in_file": int(timestamp_s + (5*temporal_index)), 
+                            "channel_index": channel_index,
+                            "site_id": site_id,
+                            "site_name": site_name, 
+                            "subsite_name": subsite_name, 
+                            "file_seq_id": int(file_seq_id),
+                            "filename": filename.decode("utf-8")
+                        })
         
         # extract filename, removes extension
         stripped_filename = local_filename.split('.')[0]
