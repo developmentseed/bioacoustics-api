@@ -90,7 +90,7 @@ def process(blob):
     # extract filename, removes extension
     stripped_filename = blob.name.split('/')[-1].split('.')[0]
     
-    with tempfile.NamedTemporaryFile(prefix="/data") as tmpfile: 
+    with tempfile.NamedTemporaryFile(prefix="/data", mode="w") as tmpfile: 
         tmpfile.write(json.dumps(metadata))
         metadata_blob = utils.bucket.blob(f"{utils.EMBEDDINGS_FOLDER}_metadata/{stripped_filename}.json")
         metadata_blob.upload_from_filename(tmpfile.name)
