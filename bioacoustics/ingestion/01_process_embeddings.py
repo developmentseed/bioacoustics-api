@@ -42,7 +42,6 @@ if __name__ == "__main__":
         embeddings =[]
         metadata = []
         with tempfile.NamedTemporaryFile(prefix="/data") as tmpfile: 
-            metadata_blob.upload_from_filename(tmpfile.name)
             blob.download_to_filename(tmpfile.name)
             raw_dataset = tf.data.TFRecordDataset(tmpfile.name)
 
