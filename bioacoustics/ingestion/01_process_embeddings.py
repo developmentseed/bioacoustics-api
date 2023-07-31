@@ -112,7 +112,7 @@ if __name__ == "__main__":
 
     total_count = 0
     for blob in sample_data_blobs: 
-        logger.info("Processing blob: ", blob)
+        logger.info(f"Processing blob: {blob.name}")
         try: 
             count = process(blob)
             total_count += count 

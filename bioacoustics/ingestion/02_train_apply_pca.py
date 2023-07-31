@@ -55,7 +55,7 @@ if __name__ == "__main__":
 
         
     for embeddings_blob in embeddings_blobs: 
-        logger.info(f"Applying dimensionality reduction to {embeddings_blob}")
+        logger.info(f"Applying dimensionality reduction to {embeddings_blob.name}")
         with tempfile.NamedTemporaryFile(prefix="/data") as tmpfile: 
             embeddings_blob.download_to_filename(tmpfile.name)
             embeddings = np.load(tmpfile.name)
