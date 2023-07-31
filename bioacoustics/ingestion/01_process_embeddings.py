@@ -86,6 +86,7 @@ def process(blob):
                         "file_seq_id": int(file_seq_id),
                         "filename": filename.decode("utf-8")
                     })
+            tmpfile.close()
             
     # extract filename, removes extension
     stripped_filename = blob.name.split('/')[-1].split('.')[0]
@@ -94,11 +95,13 @@ def process(blob):
         tmpfile.write(json.dumps(metadata))
         metadata_blob = utils.bucket.blob(f"{utils.EMBEDDINGS_FOLDER}_metadata/{stripped_filename}.json")
         metadata_blob.upload_from_filename(tmpfile.name)
+        tmpfile.close()
     
     with tempfile.NamedTemporaryFile(prefix="/data") as tmpfile: 
         np.save(tmpfile.name, embeddings)
         numpy_blob = utils.bucket.blob(f"{utils.EMBEDDINGS_FOLDER}_vector/{stripped_filename}.npy")
         numpy_blob.upload_from_filename(tmpfile.name)
+        tmpfile.close()
             
     return len(embeddings)
 
