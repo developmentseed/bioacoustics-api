@@ -9,4 +9,7 @@ RUN pip install -r requirements.txt
 
 COPY ./* .
 
+# to make sure logs are printed instantly without buffering
+ENV PYTHONUNBUFFERED=1
+
 CMD ["bash", "./run.sh", "--overwrite-collection"]
