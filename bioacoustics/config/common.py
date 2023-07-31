@@ -224,10 +224,14 @@ class Common(Configuration):
     EMBED_SERVICE_URL = os.getenv('EMBED_SERVICE_URL', 'https://embed.bioacoustics.ds.io/embed')
     A2O_API_URL = os.getenv('A2O_API_URL', 'https://api.acousticobservatory.org')
     A2O_API_TOKEN = os.getenv('A2O_API_TOKEN')
+    # MINIO configuration
+    # The SERVER_URL can be your minio instance url,
+    # or storage.googleapis.com for GCS,
+    # or s3.amazonaws.com for AWS S3
     MINIO = {
         "SERVER_URL": os.getenv('MINIO_SERVER_URL'),
         "BUCKET_NAME": os.getenv('MINIO_BUCKET_NAME', 'bioacoustics'),
-        "BUCKET_LOCATION": os.getenv('MINIO_BUCKET_LOCATION', 'us-central1'),
+        "BUCKET_LOCATION": os.getenv('MINIO_BUCKET_LOCATION'),
         "ACCESS_KEY": os.getenv('MINIO_ACCESS_KEY'),
         "SECRET_KEY": os.getenv('MINIO_SECRET_KEY'),
     }
