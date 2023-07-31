@@ -90,7 +90,7 @@ if __name__ == "__main__":
                         })
         
         # extract filename, removes extension
-        stripped_filename = local_filename.split('.')[0]
+        stripped_filename = blob.name.split('/')[-1].split('.')[0]
         
         with tempfile.NamedTemporaryFile(prefix="/data") as tmpfile: 
             tmpfile.write(json.dumps(metadata))
