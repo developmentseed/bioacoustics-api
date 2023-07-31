@@ -39,6 +39,7 @@ if __name__ == "__main__":
 
     count = 0
     for blob in sample_data_blobs: 
+        print("Processing blob: ", blob)
         embeddings =[]
         metadata = []
         with tempfile.NamedTemporaryFile(prefix="/data") as tmpfile: 
@@ -88,6 +89,8 @@ if __name__ == "__main__":
                             "file_seq_id": int(file_seq_id),
                             "filename": filename.decode("utf-8")
                         })
+        
+        print("fTotal number of records: {count}")
         
         # extract filename, removes extension
         stripped_filename = blob.name.split('/')[-1].split('.')[0]
