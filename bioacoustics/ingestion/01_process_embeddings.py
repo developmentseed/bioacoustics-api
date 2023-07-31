@@ -109,11 +109,10 @@ if __name__ == "__main__":
     for blob in sample_data_blobs: 
         print("Processing blob: ", blob)
         try: 
-            count = process(blob)    
+            count = process(blob)
+            total_count += count 
         except Exception as e: 
             print(f"Unable to process blob: ", blob)
             print(e)
-        
-        total_count += count
                 
     print(f"Total number of data records: {total_count}")
