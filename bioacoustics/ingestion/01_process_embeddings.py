@@ -1,4 +1,5 @@
 import os
+import logging
 import re
 import datetime
 import json
@@ -11,6 +12,10 @@ os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 import tensorflow as tf
 
 import utils
+
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 feature_description = {
     'timestamp_s': tf.io.FixedLenFeature([], tf.float32),
@@ -103,16 +108,15 @@ if __name__ == "__main__":
         b for b in utils.storage_client.list_blobs(utils.BUCKET_NAME, prefix=utils.EMBEDDINGS_FOLDER)
     ]
 
-    print(f"{len(sample_data_blobs)} files to process found")
+    logger.info(f"{len(sample_data_blobs)} files to process found")
 
     total_count = 0
     for blob in sample_data_blobs: 
-        print("Processing blob: ", blob)
+        logger.info("Processing blob: ", blob)
         try: 
             count = process(blob)
             total_count += count 
         except Exception as e: 
-            print(f"Unable to process blob: ", blob)
-            print(e)
+            logger.exception(f"Unable to process blob: {blob}")
                 
-    print(f"Total number of data records: {total_count}")
+    logger.info(f"Total number of data records: {total_count}")
