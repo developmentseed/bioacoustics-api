@@ -19,7 +19,7 @@ if __name__ == "__main__":
 
     for embeddings_blob in embeddings_blobs: 
 
-        with tempfile.NamedTemporaryFile(prefix="/data") as tmpfile: 
+        with tempfile.NamedTemporaryFile(prefix="/data/") as tmpfile: 
             embeddings_blob.download_to_filename(tmpfile.name)
             embeddings = np.load(tmpfile.name)
         
@@ -44,7 +44,7 @@ if __name__ == "__main__":
     pca_matrix.train(training_set)
 
     # write to file
-    with tempfile.NamedTemporaryFile(prefix="/data") as tmpfile: 
+    with tempfile.NamedTemporaryFile(prefix="/data/") as tmpfile: 
     
         faiss.write_VectorTransform(pca_matrix, tmpfile.name)
         blob = utils.bucket.blob(f"{utils.EMBEDDINGS_FOLDER}_admin/1280_to_256_dimensionality_reduction.pca")
@@ -56,7 +56,7 @@ if __name__ == "__main__":
         
     for embeddings_blob in embeddings_blobs: 
         logger.info(f"Applying dimensionality reduction to {embeddings_blob.name}")
-        with tempfile.NamedTemporaryFile(prefix="/data") as tmpfile: 
+        with tempfile.NamedTemporaryFile(prefix="/data/") as tmpfile: 
             embeddings_blob.download_to_filename(tmpfile.name)
             embeddings = np.load(tmpfile.name)
         
@@ -65,7 +65,7 @@ if __name__ == "__main__":
         
         reduced_vector_blob_name = embeddings_blob.split("/")[-1]
 
-        with tempfile.NamedTemporaryFile(prefix="/data") as tmpfile: 
+        with tempfile.NamedTemporaryFile(prefix="/data/") as tmpfile: 
             np.save(tmpfile.name, reduced_embeddings)
             blob = utils.bucket.blob(f"{utils.EMBEDDINGS_FOLDER}_reduced_vector/{reduced_vector_blob_name}")
             blob.upload_from_filename(tmpfile.name)

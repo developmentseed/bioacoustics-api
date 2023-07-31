@@ -149,7 +149,7 @@ def split_into_batches(data, n=10_000):
 
 def load_data(metadata_blob): 
     
-    with tempfile.NamedTemporaryFile(prefix="/data") as tmpfile: 
+    with tempfile.NamedTemporaryFile(prefix="/data/") as tmpfile: 
         metadata_blob.download_to_filename(tmpfile.name)
         with open(tmpfile.name, "r") as f: 
             _metadata = json.loads(f.read())    
@@ -158,7 +158,7 @@ def load_data(metadata_blob):
     embeddings_blobname = metadata_blob.name.split("/")[-1].replace(".json", ".npy")
     embedddings_blob = utils.bucket.blob(f"{utils.EMBEDDINGS_FOLDER}_reduced_vector/{embeddings_blobname}")
     
-    with tempfile.NamedTemporaryFile(prefix="/data") as tmpfile: 
+    with tempfile.NamedTemporaryFile(prefix="/data/") as tmpfile: 
         embedddings_blob.download_to_filename(tmpfile.name)
         _embeddings = np.load(tmpfile.name)
     
