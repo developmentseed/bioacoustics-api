@@ -15,6 +15,7 @@ def upload_file(audio_file, filename):
         MINIO_CONFIG["SERVER_URL"],
         access_key=MINIO_CONFIG["ACCESS_KEY"],
         secret_key=MINIO_CONFIG["SECRET_KEY"],
+        region=MINIO_CONFIG["BUCKET_LOCATION"],
         secure=False if is_localhost else True,
     )
 

@@ -227,6 +227,7 @@ class Common(Configuration):
     MINIO = {
         "SERVER_URL": os.getenv('MINIO_SERVER_URL'),
         "BUCKET_NAME": os.getenv('MINIO_BUCKET_NAME', 'bioacoustics'),
+        "BUCKET_LOCATION": os.getenv('MINIO_BUCKET_LOCATION', 'us-central1'),
         "ACCESS_KEY": os.getenv('MINIO_ACCESS_KEY'),
         "SECRET_KEY": os.getenv('MINIO_SECRET_KEY'),
     }
