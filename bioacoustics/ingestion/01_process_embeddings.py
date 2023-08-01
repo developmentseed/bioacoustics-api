@@ -93,13 +93,13 @@ def process(blob):
     
     with tempfile.NamedTemporaryFile(prefix="/data/", mode="w") as tmpfile: 
         tmpfile.write(json.dumps(metadata))
-        metadata_blob = utils.bucket.blob(f"{utils.EMBEDDINGS_FOLDER}_metadata/{stripped_filename}.json")
+        metadata_blob = utils.bucket.blob(f"vector_{utils.EMBEDDINGS_FOLDER}/{stripped_filename}.json")
         metadata_blob.upload_from_filename(tmpfile.name)
         tmpfile.close()
     
     with tempfile.NamedTemporaryFile(prefix="/data/") as tmpfile: 
         np.save(tmpfile, embeddings)
-        numpy_blob = utils.bucket.blob(f"{utils.EMBEDDINGS_FOLDER}_vector/{stripped_filename}.npy")
+        numpy_blob = utils.bucket.blob(f"metadata_{utils.EMBEDDINGS_FOLDER}/{stripped_filename}.npy")
         numpy_blob.upload_from_filename(tmpfile.name)
         tmpfile.close()
             

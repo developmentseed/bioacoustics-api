@@ -156,7 +156,7 @@ def load_data(metadata_blob):
 
     
     embeddings_blobname = metadata_blob.name.split("/")[-1].replace(".json", ".npy")
-    embedddings_blob = utils.bucket.blob(f"{utils.EMBEDDINGS_FOLDER}_reduced_vector/{embeddings_blobname}")
+    embedddings_blob = utils.bucket.blob(f"reduced_vector_{utils.EMBEDDINGS_FOLDER}/{embeddings_blobname}")
     
     with tempfile.NamedTemporaryFile(prefix="/data/") as tmpfile: 
         embedddings_blob.download_to_filename(tmpfile.name)
@@ -194,7 +194,7 @@ if __name__ == "__main__":
 
     metadata_blobs = [
         b for b in utils.storage_client.list_blobs(
-            utils.BUCKET_NAME,  prefix=f"{utils.EMBEDDINGS_FOLDER}_metadata"
+            utils.BUCKET_NAME,  prefix=f"metadata_{utils.EMBEDDINGS_FOLDER}"
         )
     ]
         
