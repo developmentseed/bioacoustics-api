@@ -111,8 +111,6 @@ if __name__ == "__main__":
         b for b in utils.storage_client.list_blobs(utils.BUCKET_NAME, prefix=utils.EMBEDDINGS_FOLDER)
     ]
 
-    sample_data_blobs = sample_data_blobs[:10]
-
     logger.info(f"{len(sample_data_blobs)} files to process found")
 
     total_count = 0
