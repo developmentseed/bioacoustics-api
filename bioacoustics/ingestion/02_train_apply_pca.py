@@ -21,17 +21,19 @@ if __name__ == "__main__":
 
         with tempfile.NamedTemporaryFile(prefix="/data/") as tmpfile: 
             embeddings_blob.download_to_filename(tmpfile.name)
-            embeddings = np.load(tmpfile.name, allow_pickle=True)
-        
-        # select random subset by generated random indexes to select
-        rand_indexes = np.random.randint(
-            low=0, high=len(embeddings), size=int(PCA_TRAINING_SAMPLE_SIZE * len(embeddings))
-        )
-        subset = embeddings[rand_indexes]
-        
-        # use native python list for append to the training set 
-        # (since you can't append to numpy arrays inplace)
-        training_set.extend(list(subset))
+            try:
+                embeddings = np.load(tmpfile.name, allow_pickle=True)
+                # select random subset by generated random indexes to select
+                rand_indexes = np.random.randint(
+                    low=0, high=len(embeddings), size=int(PCA_TRAINING_SAMPLE_SIZE * len(embeddings))
+                )
+                subset = embeddings[rand_indexes]
+                
+                # use native python list for append to the training set 
+                # (since you can't append to numpy arrays inplace)
+                training_set.extend(list(subset))
+            except Exception:
+                logger.exception(f"Failed to load {embeddings_blob.name}")
 
     # convert training set to numpy array for compatibility
     # with the faiss PCA module
@@ -58,14 +60,16 @@ if __name__ == "__main__":
         logger.info(f"Applying dimensionality reduction to {embeddings_blob.name}")
         with tempfile.NamedTemporaryFile(prefix="/data/") as tmpfile: 
             embeddings_blob.download_to_filename(tmpfile.name)
-            embeddings = np.load(tmpfile.name, allow_pickle=True)
-        
-        # apply the dimensionality reduction using the PCA matrix
-        reduced_embeddings = pca_matrix.apply(embeddings)
-        
-        reduced_vector_blob_name = embeddings_blob.name.split("/")[-1]
+            try:
+                embeddings = np.load(tmpfile.name, allow_pickle=True)
+                # apply the dimensionality reduction using the PCA matrix
+                reduced_embeddings = pca_matrix.apply(embeddings)
+                
+                reduced_vector_blob_name = embeddings_blob.name.split("/")[-1]
 
-        with tempfile.NamedTemporaryFile(prefix="/data/") as tmpfile: 
-            np.save(tmpfile, reduced_embeddings)
-            blob = utils.bucket.blob(f"reduced_vector_{utils.EMBEDDINGS_FOLDER}/{reduced_vector_blob_name}")
-            blob.upload_from_filename(tmpfile.name)
+                with tempfile.NamedTemporaryFile(prefix="/data/") as tmpfile: 
+                    np.save(tmpfile, reduced_embeddings)
+                    blob = utils.bucket.blob(f"reduced_vector_{utils.EMBEDDINGS_FOLDER}/{reduced_vector_blob_name}")
+                    blob.upload_from_filename(tmpfile.name)
+            except Exception:
+                logger.exception(f"Failed to load {embeddings_blob.name}")

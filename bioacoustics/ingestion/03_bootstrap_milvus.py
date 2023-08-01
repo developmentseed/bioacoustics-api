@@ -160,7 +160,11 @@ def load_data(metadata_blob):
     
     with tempfile.NamedTemporaryFile(prefix="/data/") as tmpfile: 
         embedddings_blob.download_to_filename(tmpfile.name)
-        _embeddings = np.load(tmpfile.name, allow_pickle=True)
+        try:
+            _embeddings = np.load(tmpfile.name, allow_pickle=True)
+        except Exception:
+            logger.exception(f"Failed to load embeddings from {embedddings_blob.name}")
+            return 0
     
     assert len(_embeddings) == len(_metadata)
     
