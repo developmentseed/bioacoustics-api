@@ -12,7 +12,7 @@ logger = logging.getLogger(__name__)
 if __name__ == "__main__":
     logger.info("Starting PCA training...")
     embeddings_blobs = [
-        b for b in utils.storage_client.list_blobs(utils.BUCKET_NAME, prefix=utils.EMBEDDINGS_FOLDER)
+        b for b in utils.storage_client.list_blobs(utils.BUCKET_NAME, prefix=f"vector_{utils.EMBEDDINGS_FOLDER}")
     ]
 
     training_set = []
