@@ -203,9 +203,7 @@ if __name__ == "__main__":
             executor.map(
                 lambda x: load_data(x),
                 metadata_blobs
-            ), 
-            total=len(metadata_blobs) 
-        
+            )        
         ) 
 
     logger.info(f"Collection {COLLECTION_NAME} currently loaded with {collection.num_entities} entities")
