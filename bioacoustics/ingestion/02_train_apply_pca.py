@@ -21,7 +21,7 @@ if __name__ == "__main__":
 
         with tempfile.NamedTemporaryFile(prefix="/data/") as tmpfile: 
             embeddings_blob.download_to_filename(tmpfile.name)
-            embeddings = np.load(tmpfile.name)
+            embeddings = np.load(tmpfile.name, allow_pickle=True)
         
         # select random subset by generated random indexes to select
         rand_indexes = np.random.randint(
@@ -58,7 +58,7 @@ if __name__ == "__main__":
         logger.info(f"Applying dimensionality reduction to {embeddings_blob.name}")
         with tempfile.NamedTemporaryFile(prefix="/data/") as tmpfile: 
             embeddings_blob.download_to_filename(tmpfile.name)
-            embeddings = np.load(tmpfile.name)
+            embeddings = np.load(tmpfile.name, allow_pickle=True)
         
         # apply the dimensionality reduction using the PCA matrix
         reduced_embeddings = pca_matrix.apply(embeddings)
