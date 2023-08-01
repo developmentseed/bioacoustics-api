@@ -188,7 +188,7 @@ if __name__ == "__main__":
         overwrite_collection_flag = False
 
     connections.connect(host=HOST, port=PORT)
-    logger.info("Connections: ", connections.list_connections())
+    logger.info(f"Connections: {connections.list_connections()}")
 
     collection = setup_collection(overwrite_collection_flag)
 
