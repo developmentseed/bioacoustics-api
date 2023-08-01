@@ -66,6 +66,6 @@ if __name__ == "__main__":
         reduced_vector_blob_name = embeddings_blob.name.split("/")[-1]
 
         with tempfile.NamedTemporaryFile(prefix="/data/") as tmpfile: 
-            np.save(tmpfile.name, reduced_embeddings)
+            np.save(tmpfile, reduced_embeddings)
             blob = utils.bucket.blob(f"reduced_vector_{utils.EMBEDDINGS_FOLDER}/{reduced_vector_blob_name}")
             blob.upload_from_filename(tmpfile.name)
