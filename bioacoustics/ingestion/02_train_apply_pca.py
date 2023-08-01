@@ -63,7 +63,7 @@ if __name__ == "__main__":
         # apply the dimensionality reduction using the PCA matrix
         reduced_embeddings = pca_matrix.apply(embeddings)
         
-        reduced_vector_blob_name = embeddings_blob.split("/")[-1]
+        reduced_vector_blob_name = embeddings_blob.name.split("/")[-1]
 
         with tempfile.NamedTemporaryFile(prefix="/data/") as tmpfile: 
             np.save(tmpfile.name, reduced_embeddings)
