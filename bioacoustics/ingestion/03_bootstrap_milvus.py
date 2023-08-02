@@ -152,7 +152,11 @@ def load_data(metadata_blob):
     with tempfile.NamedTemporaryFile(prefix="/data/") as tmpfile: 
         metadata_blob.download_to_filename(tmpfile.name)
         with open(tmpfile.name, "r") as f: 
-            _metadata = json.loads(f.read())    
+            try:
+                _metadata = json.loads(f.read())
+            except Exception:
+                logger.exception(f"Failed to load metadata from {metadata_blob.name}")
+                return 0
 
     
     embeddings_blobname = metadata_blob.name.split("/")[-1].replace(".json", ".npy")
