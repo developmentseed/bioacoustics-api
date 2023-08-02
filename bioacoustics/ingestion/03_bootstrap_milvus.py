@@ -22,7 +22,7 @@ PORT = os.environ.get("MILVUS_DB_PORT", 19530)
 
 COLLECTION_NAME = "a2o_bioacoustics"
 
-BATCH_SIZE=1000
+BATCH_SIZE=10000
 FIELD_NAMES = (
     "embedding",
     "file_timestamp",
@@ -148,6 +148,8 @@ def split_into_batches(data, n=10_000):
         yield data[i:i + n]
 
 def load_data(metadata_blob): 
+
+    logger.info(f"Loading metadata blob: {metadata_blob.name}")
     
     with tempfile.NamedTemporaryFile(prefix="/data/") as tmpfile: 
         metadata_blob.download_to_filename(tmpfile.name)
@@ -184,7 +186,6 @@ def load_data(metadata_blob):
         collection.insert(
             [[_data[fieldname] for _data in batch] for fieldname in FIELD_NAMES]
         )
-        collection.flush()
 
     return len(_embeddings)
 
@@ -213,6 +214,10 @@ if __name__ == "__main__":
                 metadata_blobs
             )        
         ) 
+    
+    # Only flush at the end of ingestion to ensure a new segment gets created
+    # for any remaining vectors
+    collection.flush()
 
     logger.info(f"Collection {COLLECTION_NAME} currently loaded with {collection.num_entities} entities")
         
