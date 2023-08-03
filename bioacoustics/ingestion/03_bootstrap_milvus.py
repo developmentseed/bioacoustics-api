@@ -22,6 +22,7 @@ PORT = os.environ.get("MILVUS_DB_PORT", 19530)
 
 COLLECTION_NAME = "a2o_bioacoustics"
 
+LOAD_PERCENTAGE = 0.25
 BATCH_SIZE=10000
 FIELD_NAMES = (
     "embedding",
@@ -206,6 +207,12 @@ if __name__ == "__main__":
             utils.BUCKET_NAME,  prefix=f"metadata_{utils.EMBEDDINGS_FOLDER}"
         )
     ]
+
+    logger.info(f"Found {len(metadata_blobs)} metadata blobs")
+    # load only LOAD_PERCENTAGE of the files
+    cutoff = max(1, int(len(metadata_blobs) * LOAD_PERCENTAGE))
+    metadata_blobs = metadata_blobs[:cutoff]
+    logger.info(f"Loading data from {len(metadata_blobs)} blobs")
         
     with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
         results = list(
