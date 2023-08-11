@@ -32,7 +32,7 @@ class MilvusConnection:
         self.collection.create_index(field, index_params)
         print(f"Created index {self.collection.index().params}")
 
-    def search(self, query_vector, expression=None, metric_type="L2", nprobe=16, limit=100, offset=0):
+    def search(self, query_vector, expression=None, limit=100, offset=0, metric_type="L2", nprobe=16):
         """Search the Milvus collection for similar vectors"""
         search_params = {
             "data": query_vector,
