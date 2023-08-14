@@ -67,6 +67,8 @@ class EmbedResultSerializer(serializers.Serializer):
 class SearchSerializer(serializers.Serializer):
     audio_file = serializers.FileField(required=False, allow_null=True)
     embed = serializers.CharField(required=False, allow_null=True)
+    metric_type = serializers.CharField(required=False, allow_null=True)
+    nprobe = serializers.IntegerField(required=False, allow_null=True)
     limit = serializers.IntegerField(
         min_value=1,
         max_value=16384,
@@ -107,7 +109,9 @@ def search_view(request):
         'embed': request.data.get('embed'),
         'limit': request.data.get('limit'),
         'offset': request.data.get('offset'),
-        'expression': request.data.get('expression')
+        'expression': request.data.get('expression'),
+        'metric_type': request.data.get('metric_type'),
+        'nprobe': request.data.get('nprobe')
     }
     search = SearchSerializer(data=data)
 
@@ -131,9 +135,11 @@ def search_view(request):
     search_vector = pca_transform(embed)
     results = m.search(
         search_vector,
-        search_params.get('expression'),
-        search_params.get('limit'),
-        search_params.get('offset')
+        expression=search_params.get('expression'),
+        limit=search_params.get('limit'),
+        offset=search_params.get('offset'),
+        metric_type=search_params.get('metric_type') or 'IP',
+        nprobe=search_params.get('nprobe') or 16
     )
     serializer = ResultSerializer(results[0], many=True)
 
