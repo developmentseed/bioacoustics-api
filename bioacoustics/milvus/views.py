@@ -15,7 +15,7 @@ from drf_spectacular.types import OpenApiTypes
 
 from .connection import MilvusConnection
 
-pca_matrix = faiss.read_VectorTransform('./bioacoustics/milvus/1280_to_256_dimensionality_reduction.pca')
+pca_matrix = faiss.read_VectorTransform('./bioacoustics/milvus/1280_to_256_dim_redux_combined_only.pca')
 
 
 class EntitySerializer(serializers.Serializer):
