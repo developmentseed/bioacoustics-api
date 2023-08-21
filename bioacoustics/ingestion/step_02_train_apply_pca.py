@@ -9,7 +9,7 @@ PCA_TRAINING_SAMPLE_SIZE = 0.05
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-if __name__ == "__main__":
+def main():
     logger.info("Starting PCA training...")
     embeddings_blobs = [
         b for b in utils.storage_client.list_blobs(utils.BUCKET_NAME, prefix=f"vector_{utils.EMBEDDINGS_FOLDER}")
@@ -73,3 +73,7 @@ if __name__ == "__main__":
                     blob.upload_from_filename(tmpfile.name)
             except Exception:
                 logger.exception(f"Failed to load {embeddings_blob.name}")
+
+
+if __name__ == "__main__":
+    main()
