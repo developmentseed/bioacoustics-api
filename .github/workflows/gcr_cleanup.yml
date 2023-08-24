@@ -7,7 +7,6 @@ on:
 
 env:
   PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
-  IMAGE: bioacoustics-api
 
 jobs:
   gcr-cleaner:
@@ -28,6 +27,13 @@ jobs:
       - uses: 'docker://us-docker.pkg.dev/gcr-cleaner/gcr-cleaner/gcr-cleaner-cli'
         with:
           args: >-
-            -repo=gcr.io/${{ env.PROJECT_ID }}/${{ env.IMAGE }}
+            -repo=gcr.io/${{ env.PROJECT_ID }}/bioacoustics-api
+            -token=${{ steps.gcloud_access_token.outputs.access_token }}
+            -keep=3
+
+      - uses: 'docker://us-docker.pkg.dev/gcr-cleaner/gcr-cleaner/gcr-cleaner-cli'
+        with:
+          args: >-
+            -repo=gcr.io/${{ env.PROJECT_ID }}/bioacoustics-ingest
             -token=${{ steps.gcloud_access_token.outputs.access_token }}
             -keep=3
