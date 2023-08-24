@@ -22,7 +22,7 @@ PORT = os.environ.get("MILVUS_DB_PORT", 19530)
 
 COLLECTION_NAME = "a2o_bioacoustics"
 
-LOAD_PERCENTAGE = 0.25
+DEFAULT_LOAD_PERCENTAGE = 25
 BATCH_SIZE=10000
 FIELD_NAMES = (
     "embedding",
@@ -190,12 +190,8 @@ def load_data(metadata_blob):
 
     return len(_embeddings)
 
-if __name__ == "__main__":
 
-    if len(sys.argv) > 1 and sys.argv[1].lower() == "--overwrite-collection":
-        overwrite_collection_flag = True
-    else:
-        overwrite_collection_flag = False
+def main(overwrite_collection_flag:bool = False, load_percentage:float = DEFAULT_LOAD_PERCENTAGE):
 
     connections.connect(host=HOST, port=PORT)
     logger.info(f"Connections: {connections.list_connections()}")
@@ -209,8 +205,8 @@ if __name__ == "__main__":
     ]
 
     logger.info(f"Found {len(metadata_blobs)} metadata blobs")
-    # load only LOAD_PERCENTAGE of the files
-    cutoff = max(1, int(len(metadata_blobs) * LOAD_PERCENTAGE))
+    # load only load_percentage of the files
+    cutoff = max(2, int(len(metadata_blobs) * load_percentage / 100))
     metadata_blobs = metadata_blobs[:cutoff]
     logger.info(f"Loading data from {len(metadata_blobs)} blobs")
         
@@ -227,4 +223,11 @@ if __name__ == "__main__":
     collection.flush()
 
     logger.info(f"Collection {COLLECTION_NAME} currently loaded with {collection.num_entities} entities")
-        
+
+
+if __name__ == "__main__":
+    if len(sys.argv) > 1 and sys.argv[1].lower() == "--overwrite-collection":
+        overwrite_collection_flag = True
+    else:
+        overwrite_collection_flag = False
+    main(overwrite_collection_flag, load_percentage=DEFAULT_LOAD_PERCENTAGE)

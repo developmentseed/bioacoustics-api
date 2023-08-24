@@ -234,4 +234,5 @@ class Common(Configuration):
         "BUCKET_LOCATION": os.getenv('MINIO_BUCKET_LOCATION'),
         "ACCESS_KEY": os.getenv('MINIO_ACCESS_KEY'),
         "SECRET_KEY": os.getenv('MINIO_SECRET_KEY'),
+        "SSL_SUPPORTED": os.getenv('MINIO_SSL_SUPPORTED', "True") != "False",
     }

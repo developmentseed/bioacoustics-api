@@ -12,4 +12,4 @@ COPY ./* .
 # to make sure logs are printed instantly without buffering
 ENV PYTHONUNBUFFERED=1
 
-CMD ["bash", "./run.sh", "--overwrite-collection"]
+CMD ["python", "./run.py", "--overwrite-collection", "--load-percentage", "25", "--steps", "all"]

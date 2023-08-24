@@ -105,7 +105,8 @@ def process(blob):
             
     return len(embeddings)
 
-if __name__ == "__main__":
+
+def main():
 
     sample_data_blobs = [
         b for b in utils.storage_client.list_blobs(utils.BUCKET_NAME, prefix=utils.EMBEDDINGS_FOLDER)
@@ -123,3 +124,7 @@ if __name__ == "__main__":
             logger.exception(f"Unable to process blob: {blob}")
                 
     logger.info(f"Total number of data records: {total_count}")
+
+
+if __name__ == "__main__":
+    main()

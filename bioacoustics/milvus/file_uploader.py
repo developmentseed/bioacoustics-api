@@ -6,17 +6,12 @@ from django.conf import settings
 def upload_file(audio_file, filename):
     """Upload file to the MINIO server"""
     MINIO_CONFIG = settings.MINIO
-    is_localhost = (
-        MINIO_CONFIG["SERVER_URL"].startswith("127.0.0.1")
-        or MINIO_CONFIG["SERVER_URL"].startswith("192.168.")
-        or MINIO_CONFIG["SERVER_URL"].startswith("localhost")
-    )
     client = Minio(
         MINIO_CONFIG["SERVER_URL"],
         access_key=MINIO_CONFIG["ACCESS_KEY"],
         secret_key=MINIO_CONFIG["SECRET_KEY"],
         region=MINIO_CONFIG["BUCKET_LOCATION"],
-        secure=False if is_localhost else True,
+        secure=MINIO_CONFIG["SSL_SUPPORTED"],
     )
 
     # Create bucket if it doesn't exist
