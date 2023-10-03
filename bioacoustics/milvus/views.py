@@ -21,7 +21,7 @@ from .connection import MilvusConnection
 from .file_uploader import upload_file
 
 
-pca_matrix = faiss.read_VectorTransform('./bioacoustics/milvus/1280_to_256_dim_redux_combined_only.pca')
+pca_matrix = faiss.read_VectorTransform('./bioacoustics/milvus/1280_to_256_dimensionality_reduction_filtered.pca')
 
 
 class EntitySerializer(serializers.Serializer):
