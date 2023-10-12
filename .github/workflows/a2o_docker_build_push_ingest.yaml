@@ -1,4 +1,4 @@
-name: Build Docker image for ingestion job and push to GCR
+name: Build Docker image for ingestion job and push to A2O GCR
 
 on:
   push:

@@ -1,4 +1,4 @@
-name: Auto delete old images from GCR
+name: Auto delete old images from A2O GCR
 
 on:
   schedule:

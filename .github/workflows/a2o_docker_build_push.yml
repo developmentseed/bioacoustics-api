@@ -1,4 +1,4 @@
-name: Build Docker Image and Push to GCR
+name: Build Docker Image and Push to A2O GCR
 
 on:
   push:
