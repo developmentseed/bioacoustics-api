@@ -20,6 +20,8 @@ logger = logging.getLogger(__name__)
 feature_description = {
     "timestamp_s": tf.io.FixedLenFeature([], tf.float32),
     "filename": tf.io.FixedLenFeature([], tf.string),
+    "nuisances": tf.io.FixedLenFeature([], tf.string),
+    "nuisances_shape": tf.io.FixedLenFeature([3], tf.int64),
     "embedding": tf.io.FixedLenFeature([], tf.string),
     "embedding_shape": tf.io.FixedLenFeature([3], tf.int64),
 }
@@ -32,10 +34,13 @@ def parse_tfrecord(example_proto):
 
     # extract embedding as 3D array of float32, from byte string
     embedding = tf.io.parse_tensor(features["embedding"], out_type=tf.float32)
+    nuisances = tf.io.parse_tensor(features["nuisances"], out_type=tf.float32)
 
     return (
         features["timestamp_s"],
         features["filename"],
+        nuisances,
+        features["nuisances_shape"],
         embedding,
         features["embedding_shape"],
     )
@@ -53,9 +58,14 @@ def process(blob):
 
         raw_dataset = tf.data.TFRecordDataset(tmpfile.name)
 
-        for timestamp_s, filename, embedding, embedding_shape in raw_dataset.map(
-            parse_tfrecord
-        ).as_numpy_iterator():
+        for (
+            timestamp_s,
+            filename,
+            nuisances,
+            nuisances_shape,
+            embedding,
+            embedding_shape,
+        ) in raw_dataset.map(parse_tfrecord).as_numpy_iterator():
             [
                 # (site_id, file_datetime, timezone, site_name, subsite_name, file_seq_id)
                 (file_datetime, timezone, site_name, subsite_name, file_seq_id)
@@ -80,8 +90,32 @@ def process(blob):
             # within a 60 second period.
             # The second dimension [0:4] is the 5 different audio channels
             # (4 separated + 1 combined audio channel)
+            # `nuisances` is a 3D array with Dims [12, 5, 3]
+            # The first and second dimensions are identical to those of
+            # the embeddings, and the 3 represents 3 different categories
+            # of "issues" that may be present in the embedding: empty (no
+            # animal calls), speech (human voices present in recording) and
+            # unknown. The embeddings should be filtered out as follows:
+            # if speech > - 0.25
+            # if empty > 1.5 (only for the raw audio, or 0th channel)
+            # if empty > 0.0 (only for the separated audio, or channels 1-4)
+
             for temporal_index, embedding_channels in enumerate(embedding):
                 for channel_index, _embedding in enumerate(embedding_channels):
+                    # check if "speech" is greater than -0.25
+                    if nuisances[temporal_index][channel_index][1] > -0.25:
+                        continue
+                    if (
+                        channel_index == 0
+                        and nuisances[temporal_index][channel_index][0] > 1.5
+                    ):
+                        continue
+                    if (
+                        channel_index != 0
+                        and nuisances[temporal_index][channel_index][0] > 0.0
+                    ):
+                        continue
+
                     sanitized_full_site_name = (
                         f"{site_name.lower()}-{subsite_name.lower()}".replace(" ", "-")
                     )
