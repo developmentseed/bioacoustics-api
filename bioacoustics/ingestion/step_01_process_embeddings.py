@@ -100,11 +100,11 @@ def process(blob):
             # if empty > 1.5 (only for the raw audio, or 0th channel)
             # if empty > 0.0 (only for the separated audio, or channels 1-4)
 
+            # Skip the entire example if any embedding has speech logit > threshold.
+            if nuisances[:, :, 1] > -0.25: continue
             for temporal_index, embedding_channels in enumerate(embedding):
                 for channel_index, _embedding in enumerate(embedding_channels):
-                    # check if "speech" is greater than -0.25
-                    if nuisances[temporal_index][channel_index][1] > -0.25:
-                        continue
+                    # Avoid indexing 'empty' channels.
                     if (
                         channel_index == 0
                         and nuisances[temporal_index][channel_index][0] > 1.5
