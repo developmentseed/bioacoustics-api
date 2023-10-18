@@ -1,6 +1,6 @@
 jupyter 
 grpcio==1.53.0
-milvus[client]==2.2.8
+milvus[client]==2.3
 tensorflow==2.13.0
 tqdm
 faiss-cpu
