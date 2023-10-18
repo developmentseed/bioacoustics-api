@@ -5,6 +5,7 @@ import datetime
 import json
 import numpy as np
 import tempfile
+import csv
 
 # Set this environment variable before loading the tensorflow
 # library to squash warning
@@ -49,6 +50,8 @@ def parse_tfrecord(example_proto):
 def process(blob):
     with open("site_name_to_id_mapping.json", "r") as f:
         site_name_to_id_mapping = json.loads(f.read())
+    with open("a2o_blocklist_no_sites.csv", "r") as f:
+        blocklist = {b["filename"]: int(b["timestamp_s"]) for b in csv.DictReader(f)}
 
     count = 0
     embeddings = []
@@ -66,6 +69,13 @@ def process(blob):
             embedding,
             embedding_shape,
         ) in raw_dataset.map(parse_tfrecord).as_numpy_iterator():
+            filename = filename.decode("utf-8")
+            if blocklist.get(filename) == int(timestamp_s):
+                logging.info(
+                    f"File: {filename} found in blocklist (timestamp: {timestamp_s}). Skipping..."
+                )
+                continue
+
             [
                 # (site_id, file_datetime, timezone, site_name, subsite_name, file_seq_id)
                 (file_datetime, timezone, site_name, subsite_name, file_seq_id)
@@ -74,7 +84,7 @@ def process(blob):
                 # a way to simplify it, please let me know!
                 # r"site_(?P<site_id>\d{4})\/(?P<datetime>\d{8}T\d{6})(?P<timezone>(?:\+\d{4})|Z)_(?P<site_name>(?:\w*|-)*)-(?P<subsite_name>(?:Wet|Dry)-(?:A|B))_(?P<file_seq_id>\d*).flac",
                 r"(?P<datetime>\d{8}T\d{6})(?P<timezone>(?:\+\d{4})|Z)_(?P<site_name>(?:\w*|-)*)-(?P<subsite_name>(?:Wet|Dry)-(?:A|B))_(?P<file_seq_id>\d*).flac",
-                filename.decode("utf-8"),
+                filename,
             )
 
             # Some files have just "Z" as timezone, assume UTC in this case
@@ -105,11 +115,13 @@ def process(blob):
                     # check if "speech" is greater than -0.25
                     if nuisances[temporal_index][channel_index][1] > -0.25:
                         continue
+                    # check if "empty" is greater than 1.5 for the raw audio channel
                     if (
                         channel_index == 0
                         and nuisances[temporal_index][channel_index][0] > 1.5
                     ):
                         continue
+                    # check if "empty" is greater than 0.0 for any of the separated audio channels
                     if (
                         channel_index != 0
                         and nuisances[temporal_index][channel_index][0] > 0.0
@@ -140,7 +152,10 @@ def process(blob):
                             "site_name": site_name,
                             "subsite_name": subsite_name,
                             "file_seq_id": int(file_seq_id),
-                            "filename": filename.decode("utf-8"),
+                            "filename": filename,
+                            "nuisances": nuisances[temporal_index][
+                                channel_index
+                            ].tolist(),
                         }
                     )
             tmpfile.close()
