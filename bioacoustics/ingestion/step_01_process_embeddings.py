@@ -53,7 +53,8 @@ def process(blob):
     with open("a2o_blocklist_no_sites.csv", "r") as f:
         blocklist = {b["filename"]: int(b["timestamp_s"]) for b in csv.DictReader(f)}
 
-    count = 0
+    count = blocklist_filtered = speech_filtered = empty_filtered = 0
+
     embeddings = []
     metadata = []
     with tempfile.NamedTemporaryFile(prefix="/data/") as tmpfile:
@@ -74,6 +75,7 @@ def process(blob):
                 logging.info(
                     f"File: {filename} found in blocklist (timestamp: {timestamp_s}). Skipping..."
                 )
+                blocklist_filtered += 1
                 continue
 
             [
@@ -110,22 +112,40 @@ def process(blob):
             # if empty > 1.5 (only for the raw audio, or 0th channel)
             # if empty > 0.0 (only for the separated audio, or channels 1-4)
 
-            # Skip the entire example if any embedding has speech logit > threshold.
-            if nuisances[:, :, 1] > -0.25:
-                continue
             for temporal_index, embedding_channels in enumerate(embedding):
                 for channel_index, _embedding in enumerate(embedding_channels):
+                    if nuisances[temporal_index][channel_index][1] > -0.25:
+                        logging.info("Nuisance value for speech > -0.25. Skipping...")
+                        logging.info(
+                            f"Nuisances: {nuisances[temporal_index].tolist()} (temporal index: {temporal_index})"
+                        )
+                        speech_filtered += 1
+                        continue
                     # Avoid indexing 'empty' channels.
                     if (
                         channel_index == 0
                         and nuisances[temporal_index][channel_index][0] > 1.5
                     ):
+                        logging.info(
+                            "Nuisance value for empty in combined channel (index: 0) > 1.5. Skipping..."
+                        )
+                        logging.info(
+                            f"Nuisances: {nuisances[temporal_index].tolist()} (temporal index: {temporal_index})"
+                        )
+                        empty_filtered += 1
                         continue
                     # check if "empty" is greater than 0.0 for any of the separated audio channels
                     if (
                         channel_index != 0
                         and nuisances[temporal_index][channel_index][0] > 0.0
                     ):
+                        logging.info(
+                            f"Nuisance value for empty in separated channel > 0.0 (index: {channel_index}). Skipping..."
+                        )
+                        logging.info(
+                            f"Nuisances: {nuisances[temporal_index].tolist()} (temporal index: {temporal_index})"
+                        )
+                        empty_filtered += 1
                         continue
 
                     sanitized_full_site_name = (
@@ -179,7 +199,7 @@ def process(blob):
         numpy_blob.upload_from_filename(tmpfile.name)
         tmpfile.close()
 
-    return len(embeddings)
+    return len(embeddings), blocklist_filtered, speech_filtered, empty_filtered
 
 
 def main():
@@ -193,15 +213,27 @@ def main():
     logger.info(f"{len(sample_data_blobs)} files to process found")
 
     total_count = 0
+    blocklist_filtered = speech_filtered = empty_filtered = 0
     for blob in sample_data_blobs:
         logger.info(f"Processing blob: {blob.name}")
         try:
-            count = process(blob)
+            count, _blocklist_filtered, _speech_filtered, _empty_filtered = process(
+                blob
+            )
             total_count += count
+            blocklist_filtered += _blocklist_filtered
+            speech_filtered += _speech_filtered
+            empty_filtered += _empty_filtered
+
         except Exception as e:
             logger.exception(f"Unable to process blob: {blob}")
 
-    logger.info(f"Total number of data records: {total_count}")
+    logger.info(
+        f"Number of files filtered from blocklist: {blocklist_filtered} (out of {len(sample_data_blobs)}) total files"
+    )
+    logger.info(f"Number of embeddings succesfully processed: {total_count}")
+    logger.info(f"Number of embeddings filtered out for speech: {speech_filtered}")
+    logger.info(f"Number of embeddings filtered out for being empty: {empty_filtered}")
 
 
 if __name__ == "__main__":
