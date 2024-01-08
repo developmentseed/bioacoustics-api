@@ -2,7 +2,7 @@
 
 [![Built with](https://img.shields.io/badge/Built_with-Cookiecutter_Django_Rest-F7B633.svg)](https://github.com/agconti/cookiecutter-django-rest)
 
-Google Bioacoustics API. Check out the project's [documentation](http://developmentseed.github.io/bioacoustics-api/).
+Google Bioacoustics API used by the [Australian Acoustic Observatory Search](https://search.acousticobservatory.org/) project. Check out the project's [documentation](https://devseed.com/api-docs/?url=https://api.search.acousticobservatory.org/api/v1/openapi).
 
 # Prerequisites
 
