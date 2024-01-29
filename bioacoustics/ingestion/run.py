@@ -1,18 +1,32 @@
 import click
-
+from step_00_bootstrap_extract_and_load import main as step_00
 from step_01_process_embeddings import main as step_01
 from step_02_train_apply_pca import main as step_02
 from step_03_bootstrap_milvus import main as step_03
 
 
 @click.command()
-@click.option("--overwrite-collection", is_flag=True, default=False, help="Overwrite collection if it exists")
+@click.option(
+    "--overwrite-collection",
+    is_flag=True,
+    default=False,
+    help="Overwrite collection if it exists",
+)
 @click.option("--steps", default="all", help="Comma separated list of steps to run")
-@click.option("--load-percentage", default=25, help="Percentage of data to load", type=float)
+@click.option(
+    "--load-percentage", default=25, help="Percentage of data to load", type=float
+)
 def run_pipeline(overwrite_collection, steps, load_percentage):
-    allowed_steps = ("all", "2_and_3", "only_3")
+    allowed_steps = ("all", "2_and_3", "only_3", "only_0")
     if steps not in allowed_steps:
-        raise ValueError(f"Invalid steps argument: {steps}. Must be one of {allowed_steps}")
+        raise ValueError(
+            f"Invalid steps argument: {steps}. Must be one of {allowed_steps}"
+        )
+    if steps == "only_0":
+        step_00(
+            overwrite_collection_flag=overwrite_collection,
+            load_percentage=load_percentage,
+        )
     if steps == "all":
         step_01()
         step_02()

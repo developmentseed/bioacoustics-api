@@ -68,8 +68,8 @@ def setup_collection(overwrite_collection_flag: bool = False):
     embedding_field = FieldSchema(
         name="embedding",
         dtype=DataType.FLOAT_VECTOR,
-        description="Float32 vector with dim 256 (reduced using PCA from origina vector dim:1280)",
-        dim=256,
+        description="Float32 vector with dim 512",
+        dim=512,
         is_primary=False,
     )
 
@@ -158,12 +158,13 @@ def setup_collection(overwrite_collection_flag: bool = False):
 
     logger.info("Creating new DISKANN index")
     # create new index (no build params required for DISKANN)
-    index_params = {
-        "index_type": "DISKANN",
-        "metric_type": "L2",
-    }
-
-    collection.create_index("embedding", index_params)
+    index_params = {"index_type": "DISKANN", "metric_type": "L2", "params": {}}
+    # index_params = {
+    #     "index_type": "IVF_SQ8",
+    #     "params": {"nlist": 1024},
+    #     "metric_type": "L2",
+    # }
+    collection.create_index(field_name="embedding", index_params=index_params)
     return collection
 
 
@@ -202,9 +203,10 @@ def extract_data(blob):
     with open("a2o_blocklist_no_sites.csv", "r") as f:
         blocklist = {b["filename"]: int(b["timestamp_s"]) for b in csv.DictReader(f)}
 
-    count_unfiltered = (
-        count_blocklist_filtered
-    ) = count_speech_filtered = count_empty_filtered = 0
+    count_unfiltered = 0
+    count_blocklist_filtered = 0
+    count_speech_filtered = 0
+    count_empty_filtered = 0
 
     data = []
     with tempfile.NamedTemporaryFile() as tmpfile:
@@ -290,8 +292,6 @@ def extract_data(blob):
                             f"No site id found for site: {sanitized_full_site_name}"
                         )
 
-                    count += 1
-
                     data.append(
                         {
                             "embedding": _embedding,
@@ -314,7 +314,7 @@ def extract_data(blob):
             tmpfile.close()
 
     logging.info(
-        f"Done. {len(data)} embeddings were processed (out of {count_unfiltered} attempted). Number of embeddings filtered: speech-{count_speech_filtered}, empty-{count_empty_filtered}. Number of files found in blocklis: {count_blocklist_filtered}"
+        f"Done processing {blob.name}. {len(data)} embeddings were processed (out of {count_unfiltered} attempted). Number of embeddings filtered: speech-{count_speech_filtered}, empty-{count_empty_filtered}. Number of files found in blocklis: {count_blocklist_filtered}"
     )
 
     return (
@@ -363,6 +363,7 @@ def main(
     overwrite_collection_flag: bool = False,
     load_percentage: float = DEFAULT_LOAD_PERCENTAGE,
 ):
+    logger.info("Running updated 512-dim embeddings script with DiskANN")
     connections.connect(host=HOST, port=PORT)
     logger.info(f"Connections: {connections.list_connections()}")
 
@@ -373,6 +374,7 @@ def main(
         for blob in utils.bucket.list_blobs(prefix=utils.EMBEDDINGS_FOLDER)
         if re.match(r"a2o_512/em_\d{3}/embeddings-\d{5}-of-\d{5}", blob.name)
     ]
+    blobs = blobs[0:10]
     logger.info(f"Found {len(blobs)} blobs")
 
     # load only load_percentage of the files
@@ -381,7 +383,7 @@ def main(
 
     logger.info(f"Loading data from {len(blobs)} blobs")
 
-    with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
+    with concurrent.futures.ThreadPoolExecutor(max_workers=1) as executor:
         results = list(executor.map(lambda blob: load_into_miluvs(blob), blobs))
 
     # Only flush at the end of ingestion to ensure a new segment gets created
